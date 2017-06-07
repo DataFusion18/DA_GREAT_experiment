@@ -60,22 +60,21 @@ leaf.0128.melt = rbind(leaf.0128.melt, biomass.0129.melt)
 leaf.0209.melt = rbind(leaf.0209.melt, biomass.0210.melt)
 
 #-----------------------------------------------------------------------------------------
-# Plot the comparison grapgh from harvest and 
-p1 = ggplot() +
+# Plot the comparison graph from harvest data and data from standing seedlings
+plots = list()
+plots[[1]] = ggplot() +
   geom_line(data = leaf.0128.melt, aes(x = Code, y = value, group = interaction(variable,date), colour=factor(variable), linetype=factor(date))) +
   xlab("Code") +
   ylab("Leaf data") +
   ggtitle("Leaf data")
-p1
-ggsave(p1,filename=paste("Output/LA_LC_compare_1.png"))
+# ggsave(plots[[1]],filename=paste("Output/LA_LC_compare_1.png"))
 
-p2 = ggplot() +
+plots[[2]] = ggplot() +
   geom_line(data = leaf.0209.melt, aes(x = Code, y = value, group = interaction(variable,date), colour=factor(variable), linetype=factor(date))) + 
   xlab("Code") +
   ylab("Leaf data") +
   ggtitle("Leaf data")
-p2
-ggsave(p2,filename=paste("Output/LA_LC_compare_2.png"))
+# ggsave(plots[[2]],filename=paste("Output/LA_LC_compare_2.png"))
 
 # # Plot measurement vs harvest LA to judge the data collection
 # png(file = "Output/LA_harvest_vs_measurement.png")
@@ -103,7 +102,7 @@ fit.res22 = lm(residuals2 ~ biomass.0210.raw$total.LA)
 # mf = (mf1 + mf2) / 2
 
 # Plot measurement with correction factor (cf) vs harvest LA to judge the data collection
-png(file = "Output/LA_harvest_vs_measurement_cf.png")
+# png(file = "Output/LA_harvest_vs_measurement_cf.png")
 par(mfrow=c(2,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0))
 plot(leaf.0128.mod$total.LA, biomass.0129.raw$total.LA, col="red", pch=16, xlab="Measured leaf area" ~ (cm^{2}), ylab="Harvested leaf area" ~ (cm^{2}))
 abline(0, 1) 
@@ -129,12 +128,16 @@ plot(leaf.0209.mod$total.LA + fitted(fit.res2), biomass.0210.raw$total.LA, col="
 abline(0, 1) 
 rmse.22 = sqrt( mean( ((leaf.0209.mod$total.LA + fitted(fit.res2)) - biomass.0210.raw$total.LA)^2) )
 text(max(biomass.0210.raw$total.LA)*0.2, max(biomass.0210.raw$total.LA)*0.9, paste("RMSE =", format(round(rmse.22, 1))), pos = 4)
-
+plots[[3]] = recordPlot()
 # plot(leaf.0209.mod$total.LA + fitted(fit.res2), biomass.0210.raw$total.LA, col="red", pch=16, xlab="Measured leaf area" ~ (cm^{2}), ylab="Harvested leaf area" ~ (cm^{2}))
 # abline(0, 1) 
 # rmse.222 = sqrt( mean( ((leaf.0209.mod$total.LA + fitted(fit.res22)) - biomass.0210.raw$total.LA)^2) )
 # plot(leaf.0209.mod$total.LA * mf2, biomass.0210.raw$total.LA, col="red", pch=16, xlab="Measured leaf area" ~ (cm^{2}), ylab="Harvested leaf area" ~ (cm^{2}))
 # abline(0, 1) 
+
+pdf(file = "Output/LA_LC_compare.pdf")
+grid.arrange(plots[[1]],plots[[2]])
+plots[[3]]
 dev.off()
 #-----------------------------------------------------------------------------------------
 
@@ -145,33 +148,41 @@ height.dia <- read.csv("Data/GHS39_GREAT_MAIN_HEIGHTDIAMETER_20160108-20160229_L
 height.dia = height.dia[height.dia$W_treatment %in% as.factor("w"),]
 height.dia$D = rowMeans(height.dia[,c("D1", "D2")], na.rm=TRUE)
 height.dia = height.dia[complete.cases(height.dia), ]
-# height.dia$Date = as.Date(height.dia$Date)
+height.dia$Date = as.Date(height.dia$Date, format = "%d/%m/%Y")
 # height.dia.sub = subset(height.dia, Date %in% as.factor("29/02/2016"))
 
 
 initial.harvest = read.csv("Data/GHS39_GREAT_MAIN_BIOMASS_20160107_L2.csv")
 initial.harvest[ , c("Leafmass", "Stemmass", "Rootmass")] = initial.harvest[ , c("Leafmass", "Stemmass", "Rootmass")]
 initial.harvest$Height = initial.harvest$Height/10 # Unit conversion from mm to cm
+initial.harvest$Date = as.Date("2016-01-07")
+initial.harvest$Room = 0
 
 int.harvest.1 = read.csv("Data/GHS39_GREAT_MAIN_BIOMASS_20160129_L2.csv")
 int.harvest.1 = int.harvest.1[int.harvest.1$W_treatment %in% as.factor("w"),]
 int.harvest.1[ , c("Leafmass", "Stemmass", "Rootmass")] = int.harvest.1[ , c("Leafmass", "Stemmass", "Rootmass")]
+int.harvest.1$Date = as.Date("2016-01-29")
+int.harvest.1 = unique(merge(int.harvest.1, height.dia[,c("Room","Pot")]))
 int.harvest.2 = read.csv("Data/GHS39_GREAT_MAIN_BIOMASS_20160210_L2.csv")
 int.harvest.2 = int.harvest.2[int.harvest.2$W_treatment %in% as.factor("w"),]
 int.harvest.2[ , c("Leafmass", "Stemmass", "Rootmass")] = int.harvest.2[ , c("Leafmass", "Stemmass", "Rootmass")]
+int.harvest.2$Date = as.Date("2016-02-10")
+int.harvest.2 = unique(merge(int.harvest.2, height.dia[,c("Room","Pot")]))
 
 final.harvest = read.csv("Data/GHS39_GREAT_MAIN_BIOMASS_20160217-20160224_L3_with date.csv")
 final.harvest$Date = as.Date(final.harvest$Date, format = "%d/%m/%Y")
 final.harvest = final.harvest[final.harvest$W_treatment %in% as.factor("w"),]
-final.harvest$Room = NULL
+# final.harvest$Room = NULL
 final.harvest$Leafarea = rowSums(final.harvest[,c("Leafarea", "Leafarea_sub")], na.rm=T)
 final.harvest$Leafmass = rowSums(final.harvest[,c("Leafmass", "Leafmass_sub")], na.rm=T)
 final.harvest$Stemmass = rowSums(final.harvest[,c("Stemmass", "Stemmass_sub")], na.rm=T)
 final.harvest$Rootmass = rowSums(final.harvest[,c("Rootmass", "Rootmass_sub")], na.rm=T)
 final.harvest[c("Leafarea_sub","Leafmass_sub","Stemmass_sub","Rootmass_sub")] = NULL
 final.harvest[ , c("Leafmass", "Stemmass", "Rootmass")] = final.harvest[ , c("Leafmass", "Stemmass", "Rootmass")]/1000 # Unit conversion from mg to g
+# final.harvest = unique(merge(final.harvest, height.dia[,c("Room","Pot")]))
 
-harvest.data = rbind(int.harvest.1, int.harvest.2, subset(final.harvest, select = -Date))
+harvest.data = rbind(int.harvest.1, int.harvest.2, final.harvest)
+# harvest.data = rbind(int.harvest.1, int.harvest.2, subset(final.harvest, select = -Date))
 harvest.data$W_treatment = NULL
 harvest.data = rbind(harvest.data, initial.harvest)
 harvest.data$D = rowMeans(harvest.data[,c("D1", "D2")], na.rm=TRUE)
@@ -181,9 +192,9 @@ harvest.data = harvest.data[with(harvest.data, order(Rootmass)), ]
 #-----------------------------------------------------------------------------------------
 ################### Linear regression model fitting [log(stem_mass) = b(1) + b(2)*log(dia) + b(3)*log(height)]
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
-# Units are: masses = g; height = cm; dia = mm
-model.fit = data.frame(harvest.data$Code, harvest.data$Height, harvest.data$D, harvest.data$Leafarea, harvest.data$Leafmass, harvest.data$Stemmass, harvest.data$Rootmass)
-names(model.fit) = c("Code", "Height", "D", "Leafarea", "Leafmass", "Stemmass", "Rootmass")
+# Units are: masses = g; height = cm; dia = mm, leafarea = cm^2
+model.fit = data.frame(harvest.data$Date, harvest.data$Code, harvest.data$Height, harvest.data$D, harvest.data$Leafarea, harvest.data$Leafmass, harvest.data$Stemmass, harvest.data$Rootmass)
+names(model.fit) = c("Date", "Code", "Height", "D", "Leafarea", "Leafmass", "Stemmass", "Rootmass")
 
 fit.sm <- lm(log(Stemmass) ~ log(D) + log(Height), data=model.fit)
 summary(fit.sm) # show results
@@ -203,27 +214,6 @@ height.dia$Stemmass = eq(height.dia$D,height.dia$Height)
 
 #-----------------------------------------------------------------------------------------
 
-
-#-----------------------------------------------------------------------------------------
-# Plotting observation and modelled data
-png(file = "Output/1.Height_Stem mass.png")
-plot(height.dia$Height,height.dia$Stemmass,col="red",main="Height vs Stemmass", pch=15, xlab="Height (cm)", ylab="Stem mass (g)")
-lines(model.fit$Height,model.fit$Stemmass,type="p", col="green", pch=20)
-legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-dev.off()
-rmse.stemmass.height = sqrt(mean((eq(model.fit$D,model.fit$Height)-model.fit$Stemmass)^2,na.rm=TRUE))
-
-png(file = "Output/1.Diameter_Stemmass.png")
-plot(height.dia$D,height.dia$Stemmass, col="red", main="Diameter vs Stem mass", pch=16, xlab="Diameter (mm)", ylab="Stem mass (g)")
-lines(model.fit$D,model.fit$Stemmass,type="p",col="green", pch=20)
-legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-dev.off()
-# plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
-# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
-# legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-#-----------------------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------------------
 ################### Linear regression model fitting [log(root_mass) = b(1) + b(2)*log(dia) + b(3)*log(height)]
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
 # Units are: masses = g; height = cm; dia = mm
@@ -240,24 +230,6 @@ eq = function(x,y){exp(coefficients(fit.rm)[1] + coefficients(fit.rm)[2] * log(x
 
 # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
 height.dia$Rootmass = eq(height.dia$D,height.dia$Height)
-
-#-----------------------------------------------------------------------------------------
-# Plotting observation and modelled data
-png(file = "Output/2.Height_Rootmass.png")
-plot(height.dia$Height,height.dia$Rootmass,col="red",main="Height vs Root mass", pch=15, xlab="Height (cm)", ylab="Root mass (g)")
-lines(model.fit$Height,model.fit$Rootmass,type="p", col="green", pch=20)
-legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-dev.off()
-png(file = "Output/2.Diameter_Rootmass.png")
-plot(height.dia$D,height.dia$Rootmass, col="red", main="Diameter vs Root mass", pch=16, xlab="Diameter (mm)", ylab="Root mass (g)")
-lines(model.fit$D,model.fit$Rootmass,type="p",col="green", pch=20)
-legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-dev.off()
-# plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
-# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
-# legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-#-----------------------------------------------------------------------------------------
-
 
 #-----------------------------------------------------------------------------------------
 ################### Linear regression model fitting [log(leaf_mass) = b(1) + b(2)*log(dia) + b(3)*log(height)]
@@ -278,24 +250,6 @@ eq = function(x,y){exp(coefficients(fit.lm)[1] + coefficients(fit.lm)[2] * log(x
 height.dia$Leafmass = eq(height.dia$D,height.dia$Height)
 
 #-----------------------------------------------------------------------------------------
-# Plotting observation and modelled data
-png(file = "Output/3.Height_Leafmass.png")
-plot(height.dia$Height,height.dia$Leafmass,col="red",main="Height vs Leaf mass", pch=15, xlab="Height (cm)", ylab="Leaf mass (g)")
-lines(model.fit$Height,model.fit$Leafmass,type="p", col="green", pch=20)
-legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-dev.off()
-png(file = "Output/3.Diameter_Leafmass.png")
-plot(height.dia$D,height.dia$Leafmass, col="red", main="Diameter vs Leaf mass", pch=16, xlab="Diameter (mm)", ylab="Leaf mass (g)")
-lines(model.fit$D,model.fit$Leafmass,type="p",col="green", pch=20)
-legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-dev.off()
-# plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
-# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
-# legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-#-----------------------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------------------
 ################### Linear regression model fitting [log(leaf_mass) = b(1) + b(2)*log(dia) + b(3)*log(height)]
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
 # Units are: masses = g; height = cm; dia = mm; leaf area = cm2
@@ -313,22 +267,85 @@ eq = function(x,y){exp(coefficients(fit.la)[1] + coefficients(fit.la)[2] * log(x
 
 # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
 height.dia$Leafarea = eq(height.dia$D,height.dia$Height)
+#-----------------------------------------------------------------------------------------
+
 
 #-----------------------------------------------------------------------------------------
 # Plotting observation and modelled data
-png(file = "Output/4.Height_Leafarea.png")
-plot(height.dia$Height,height.dia$Leafarea,col="red",main="Height vs Leaf area", pch=15, xlab="Height (cm)", ylab="Leaf mass (g)")
-lines(model.fit$Height,model.fit$Leafarea,type="p", col="green", pch=20)
+plots = list() 
+par(mfrow = c(2, 2))
+plot(height.dia$Height,height.dia$Stemmass,col="red",main="Height vs Stemmass", pch=15, xlab="Height (cm)", ylab="Stemmass (g DM)")
+lines(model.fit$Height,model.fit$Stemmass,type="p", col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-dev.off()
-png(file = "Output/4.Diameter_Leafarea.png")
-plot(height.dia$D,height.dia$Leafarea, col="red", main="Diameter vs Leaf area", pch=16, xlab="Diameter (mm)", ylab="Leaf mass (g)")
-lines(model.fit$D,model.fit$Leafarea,type="p",col="green", pch=20)
+# dev.off()
+# rmse.stemmass.height = sqrt(mean((eq(model.fit$D,model.fit$Height)-model.fit$Stemmass)^2,na.rm=TRUE))
+
+plot(height.dia$D,height.dia$Stemmass, col="red", main="Diameter vs Stemmass", pch=16, xlab="Diameter (mm)", ylab="Stemmass (g DM)")
+lines(model.fit$D,model.fit$Stemmass,type="p",col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
-dev.off()
+# dev.off()
 # plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
 # lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
 # legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+#-----------------------------------------------------------------------------------------
+
+# Plotting observation and modelled data
+# png(file = "Output/2.Height_Rootmass.png")
+plot(height.dia$Height,height.dia$Rootmass,col="red",main="Height vs Rootmass", pch=15, xlab="Height (cm)", ylab="Rootmass (g DM)")
+lines(model.fit$Height,model.fit$Rootmass,type="p", col="green", pch=20)
+legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+# dev.off()
+# png(file = "Output/2.Diameter_Rootmass.png")
+plot(height.dia$D,height.dia$Rootmass, col="red", main="Diameter vs Rootmass", pch=16, xlab="Diameter (mm)", ylab="Rootmass (g DM)")
+lines(model.fit$D,model.fit$Rootmass,type="p",col="green", pch=20)
+legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+plots[[1]] = recordPlot()
+# dev.off()
+# plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
+# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
+# legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+
+#-----------------------------------------------------------------------------------------
+# Plotting observation and modelled data
+# png(file = "Output/3.Height_Leafmass.png")
+par(mfrow = c(2, 2))
+plot(height.dia$Height,height.dia$Leafmass,col="red",main="Height vs Leafmass", pch=15, xlab="Height (cm)", ylab="Leafmass (g DM)")
+lines(model.fit$Height,model.fit$Leafmass,type="p", col="green", pch=20)
+legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+# dev.off()
+# png(file = "Output/3.Diameter_Leafmass.png")
+plot(height.dia$D,height.dia$Leafmass, col="red", main="Diameter vs Leafmass", pch=16, xlab="Diameter (mm)", ylab="Leafmass (g DM)")
+lines(model.fit$D,model.fit$Leafmass,type="p",col="green", pch=20)
+legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+# dev.off()
+# plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
+# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
+# legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+
+#-----------------------------------------------------------------------------------------
+# Plotting observation and modelled data
+# png(file = "Output/4.Height_Leafarea.png")
+plot(height.dia$Height,height.dia$Leafarea,col="red",main="Height vs Leafarea", pch=15, xlab="Height (cm)", ylab="Leafarea" ~ (cm^{2}))
+lines(model.fit$Height,model.fit$Leafarea,type="p", col="green", pch=20)
+legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+# dev.off()
+# png(file = "Output/4.Diameter_Leafarea.png")
+plot(height.dia$D,height.dia$Leafarea, col="red", main="Diameter vs Leafarea", pch=16, xlab="Diameter (mm)", ylab="Leafarea" ~ (cm^{2}))
+lines(model.fit$D,model.fit$Leafarea,type="p",col="green", pch=20)
+legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+plots[[2]] = recordPlot()
+# dev.off()
+# plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
+# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
+# legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
+
+pdf(file = "Output/1.tree_attributes_over_time.pdf")
+plots[[1]]
+plots[[2]]
+dev.off()
+#-----------------------------------------------------------------------------------------
+
+
 #-----------------------------------------------------------------------------------------
 # summerizing the model fits
 model.summary = data.frame(Model = as.character(c("fit.sm","fit.rm","fit.lm","fit.la")), Adjusted.R.squared = c(summary(fit.sm)$adj.r.squared,summary(fit.rm)$adj.r.squared,
@@ -336,7 +353,7 @@ model.summary = data.frame(Model = as.character(c("fit.sm","fit.rm","fit.lm","fi
                            Residual.standard.error = c(sigma(fit.sm),sigma(fit.rm),sigma(fit.lm),sigma(fit.la)), percentage.error = c(percentage.error.sm,percentage.error.rm,percentage.error.lm,percentage.error.la))
 
 # Plot measuremnts vs fitted points to judge the model fits
-png(file = "Output/model_fit.png")
+# png(file = "Output/model_fit.png")
 par(mfrow=c(2,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0))
 plot(exp(fitted(fit.sm)), model.fit$Stemmass, col="red", pch=16, xlab="Fitted stem mass (g)", ylab="Measured stem mass (g)")
 abline(0, 1) 
@@ -355,6 +372,31 @@ plot(exp(fitted(fit.la)), model.fit$Leafarea, col="black", pch=16, xlab = expres
 abline(0, 1) 
 text(min(exp(fitted(fit.la))), max(model.fit$Leafarea)*0.9, paste("Adj R-squared =", format(round(summary(fit.la)$adj.r.squared, 2)), 
                                                                   "\nResidual SE =", format(round(sigma(fit.la), 2)), "\n% Error =", format(round(percentage.error.la,1))), pos = 4)
+plots[[3]] = recordPlot()
+# dev.off()
+
+# plot residuals against fitted values and quantile-quantile plot
+# png(file = "Output/model_residuals.png", units="px", width=1500, height=2000, res=300)
+par(mfrow=c(4,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0))
+
+plot(resid(fit.sm) ~ exp(fitted(fit.sm)), col="red", xlab="Fitted stem mass (g)", ylab="Residual stem mass (g)")
+abline(h=0)
+qqPlot(residuals(fit.sm), ylab="Residual stem mass (g)")
+plot(resid(fit.rm) ~ exp(fitted(fit.rm)), col="green", xlab="Fitted root mass (g)", ylab="Residual root mass (g)")
+abline(h=0)
+qqPlot(residuals(fit.rm), ylab="Residual stem mass (g)")
+plot(resid(fit.lm) ~ exp(fitted(fit.lm)), col="blue", xlab="Fitted leaf mass (g)", ylab="Residual leaf mass (g)")
+abline(h=0)
+qqPlot(residuals(fit.lm), ylab="Residual leaf mass (g)")
+plot(resid(fit.la) ~ exp(fitted(fit.la)), col="black", xlab = expression("Fitted leaf area" ~ (cm^{2})), ylab="Residual leaf area" ~ (mm^{2}))
+abline(h=0)
+qqPlot(residuals(fit.la), ylab="Residual leaf area" ~ (cm^{2}))
+plots[[4]] = recordPlot()
+# dev.off() 
+
+pdf(file = "Output/3.model_attributes.pdf")
+plots[[3]]
+plots[[4]]
 dev.off()
 #-----------------------------------------------------------------------------------------
 # setwd("Output")
@@ -388,7 +430,7 @@ avg.harvest.data = avg.harvest.data[rep(seq_len(nrow(avg.harvest.data)), each=le
 avg.harvest.data$Room = rooms
 
 # Intermediate harvest data 1
-int.harvest.1 = unique(merge(int.harvest.1, height.dia[,c("Room","Pot")]))
+# int.harvest.1 = unique(merge(int.harvest.1, height.dia[,c("Room","Pot")]))
 int.harvest.1$Date = as.Date("2016-01-29")
 for(i in 1:length(rooms)) {
   int.harvest.1.idn = subset(int.harvest.1,Room==rooms[i]) 
@@ -399,7 +441,7 @@ for(i in 1:length(rooms)) {
 }
 
 # Intermediate harvest data 2
-int.harvest.2 = unique(merge(int.harvest.2, height.dia[,c("Room","Pot")]))
+# int.harvest.2 = unique(merge(int.harvest.2, height.dia[,c("Room","Pot")]))
 int.harvest.2$Date = as.Date("2016-02-10")
 for(i in 1:length(rooms)) {
   int.harvest.2.idn = subset(int.harvest.2,Room==rooms[i]) 
@@ -410,18 +452,30 @@ for(i in 1:length(rooms)) {
 }
 
 # Final harvest data
-final.harvest = unique(merge(final.harvest, height.dia[,c("Room","Pot")]))
+# final.harvest = unique(merge(final.harvest, height.dia[,c("Room","Pot")]))
 final.harvest = final.harvest[with(final.harvest, order(Room,Date)), ]
 for(i in 1:length(rooms)) {
   final.harvest.idn = subset(final.harvest,Room==rooms[i]) 
-  for(j in 1:length(unique(final.harvest.idn$Date))) {
-    final.harvest.idn.date = subset(final.harvest.idn, Date == unique(final.harvest.idn$Date)[j])
-    avg.harvest.data[nrow(avg.harvest.data)+1, c("Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
+  for(j in 1:2) {
+    if (j==1) {
+      final.harvest.idn.date = subset(final.harvest.idn, Date %in% as.Date(c("2016-02-17", "2016-02-18", "2016-02-19")))
+    } else {
+      final.harvest.idn.date = subset(final.harvest.idn, Date %in% as.Date(c("2016-02-22", "2016-02-23", "2016-02-24")))
+    }
+      avg.harvest.data[nrow(avg.harvest.data)+1, c("Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
     avg.harvest.data[nrow(avg.harvest.data), c("Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE")] = (apply(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], 2, sd, na.rm = TRUE))/(nrow(final.harvest.idn.date))^0.5 # R9 = Standard error of leaf counts
-    avg.harvest.data$Date[nrow(avg.harvest.data)] = final.harvest.idn.date$Date[1]
+    avg.harvest.data$Date[nrow(avg.harvest.data)] = mean(final.harvest.idn.date$Date)
     avg.harvest.data$Room[nrow(avg.harvest.data)] = rooms[i]
   }
 }
+
+# for(j in 1:length(unique(final.harvest.idn$Date))) {
+#   final.harvest.idn.date = subset(final.harvest.idn, Date == unique(final.harvest.idn$Date)[j])
+#   avg.harvest.data[nrow(avg.harvest.data)+1, c("Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
+#   avg.harvest.data[nrow(avg.harvest.data), c("Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE")] = (apply(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], 2, sd, na.rm = TRUE))/(nrow(final.harvest.idn.date))^0.5 # R9 = Standard error of leaf counts
+#   avg.harvest.data$Date[nrow(avg.harvest.data)] = final.harvest.idn.date$Date[1]
+#   avg.harvest.data$Room[nrow(avg.harvest.data)] = rooms[i]
+# }
 
 melted.harvest.data = melt(avg.harvest.data, id.vars=c("Date","Room"))
 melted.harvest.data$Group = as.factor("Measured")
@@ -429,13 +483,12 @@ melted.harvest.data$Group = as.factor("Measured")
 
 #-----------------------------------------------------------------------------------------
 # Data predicted for all 15 replicates from regression analyses done with all available harvest data
-height.dia$Date = as.Date(height.dia$Date, format = "%d/%m/%Y")
-Keeps = c("Date","Room","Leafarea", "Leafmass", "Stemmass", "Rootmass")
+keeps = c("Date","Room","Leafarea","Leafmass","Stemmass","Rootmass")
 height.dia.crop = height.dia[ , keeps, drop = FALSE]
 pred.data = data.frame(matrix(vector(), 0, 10,
                                      dimnames=list(c(), c("Date", "Room", "Leafarea", "Leafarea_SE", "Leafmass", "Leafmass_SE", "Stemmass", "Stemmass_SE", "Rootmass", "Rootmass_SE"))),
                               stringsAsFactors=F)
-pred.data$Date = as.Date
+pred.data$Date = as.Date(pred.data$Date)
 for(i in 1:length(rooms)) {
   height.dia.crop.idn = subset(height.dia.crop,Room==rooms[i]) 
   for(j in 1:length(unique(height.dia.crop.idn$Date))) {
@@ -452,6 +505,7 @@ melted.pred.data$Group = as.factor("Predicted")
 melted.data = rbind(melted.harvest.data,melted.pred.data)
 
 # plot all harvest data
+plots = list()
 meas = as.factor(c("Leafarea", "Leafmass", "Stemmass", "Rootmass"))
 error = as.factor(c("Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE"))
 pd <- position_dodge(1) # move the overlapped errorbars horizontally
@@ -460,8 +514,8 @@ for (p in 1:length(meas)) {
   summary.error.Cpool = subset(melted.data,variable %in% error[p])
   summary.error.Cpool$parameter = summary.data.Cpool$value
   
-  p3 = ggplot(summary.error.Cpool, aes(x=Date, y=parameter, group = interaction(Room,Group), colour=as.factor(Room), shape=as.factor(Group))) + 
-    geom_point(position=pd) +
+  plots[[p]] = ggplot(summary.error.Cpool, aes(x=Date, y=parameter, group = interaction(Room,Group), colour=as.factor(Room), shape=as.factor(Group))) + 
+    geom_point(position=pd,size=2.5) +
     geom_errorbar(position=pd,aes(ymin=parameter-value, ymax=parameter+value), colour="grey", width=2) +
     geom_line(position=pd,data = summary.error.Cpool, aes(x = Date, y = parameter, group = interaction(Room,Group), colour=as.factor(Room), linetype=as.factor(Group))) +
     ylab(paste(as.character(meas[p]),"(g DM)")) + 
@@ -481,9 +535,129 @@ for (p in 1:length(meas)) {
     theme(axis.title.x = element_blank()) +
     theme(axis.title.y = element_text(size = 14, vjust=0.3)) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-  p3
-  ggsave(p3,filename=paste("Output/Measured_",meas[p],".png",sep=""))
+  
+  if (p==1) {
+    plots[[p]] = plots[[p]] + ylab(expression(Leafarea~"("*cm^"2"*")"))
+  }
+  # ggsave(p3,filename=paste("Output/Measured_",meas[p],".png",sep=""))
 }
 
+pdf(file = "Output/2.tree_attributes_measured_vs_predicted.pdf",width=12, height=15)
+print (do.call(grid.arrange,  plots))
+# grid.arrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]])
+dev.off() 
+#-----------------------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------------------
+#- Plot all vs harvested (height and dia) data to explore the sampling effect on biomass prediction variation
+height.dia$datatype = as.character("all")
+harvest.data$datatype = as.character("harvested")
+# harvest.data = unique(merge(harvest.data, height.dia[,c("Room","Pot")]))
+harvest.data$Leafno = NULL
+# height.dia$Room = NULL
+avg.harvest.data.sampling = rbind(height.dia,harvest.data)
+keeps <- c("Date", "Room", "datatype", "Height", "D", "Leafarea", "Leafmass", "Stemmass", "Rootmass")
+avg.harvest.data.sampling = avg.harvest.data.sampling[ , keeps, drop = FALSE]
+unique(avg.harvest.data.sampling$Date)
+avg.harvest.data.sampling.1 = subset(avg.harvest.data.sampling, Date %in% 
+                                     as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10")))
+avg.harvest.data.sampling.2 = subset(avg.harvest.data.sampling, !(Date %in%
+                                       as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10"))))
+plots = list() 
+plots[[1]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Date, y=D)) + geom_boxplot(aes(fill=datatype)) +
+  geom_jitter(size=0.5) +
+  facet_wrap( ~ Date, scales="free_x") +
+  xlab("Date") + ylab("Diameter") + ggtitle("Diameter over time") +
+  guides(fill=guide_legend(title="Data type")) +
+  theme_bw() + theme(legend.position = c(0.9,0.85))
+plots[[2]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Date, y=Height)) + geom_boxplot(aes(fill=datatype)) +
+  geom_jitter(size=0.5) +
+  facet_wrap( ~ Date, scales="free_x") +
+  xlab("Date") + ylab("Height") + ggtitle("Height over time") +
+  guides(fill=guide_legend(title="Data type")) +
+  theme_bw() + theme(legend.position = c(0.9,0.85))
+
+plots[[3]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=D)) + geom_boxplot(aes(fill=datatype)) +
+  geom_jitter(size=0.5) +
+  facet_wrap( ~ Date, scales="free_x") +
+  xlab("Date") + ylab("Diameter") + ggtitle("Diameter over time") +
+  guides(fill=guide_legend(title="Data type")) +
+  theme_bw() + theme(legend.position = c(0.9,0.1))
+plots[[4]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=Height)) + geom_boxplot(aes(fill=datatype)) +
+  geom_jitter(size=0.5) +
+  facet_wrap( ~ Date, scales="free_x") +
+  xlab("Date") + ylab("Height") + ggtitle("Height over time") +
+  guides(fill=guide_legend(title="Data type")) +
+  theme_bw() + theme(legend.position = c(0.9,0.1))
+
+pdf(file = "Output/4.data_sampling.pdf")
+plots
+dev.off() 
+
+#-----------------------------------------------------------------------------------------
+# Plot all data (harvested and predicted) in log scale over time 
+plots = list() 
+font.size = 10
+# ggplot(data=avg.harvest.data.sampling, aes(x=D, y=Stemmass, group = interaction(Room,datatype), colour=as.factor(Room), shape=as.factor(datatype), size=as.factor(datatype))) +
+#   geom_point() +
+#   coord_trans(y = "log10") +
+#   scale_size_manual(values=c(1,2))
+plot.fun1 <- function(df1,df2,font.size){
+  plots = ggplot() +
+    geom_point(data=df1, aes(x=df1[,2], y=df1[,3], group = colnames(df1)[1], colour=as.factor(df1[,1])),size=0.1) +
+    coord_trans(y = "log10") + ylab(paste(as.character(colnames(df1)[3] ), "(log scale)")) + 
+    xlab(paste(as.character(colnames(df1)[2]))) +
+    geom_point(data=df2, aes(x = df2[,2], y = df2[,3], group = colnames(df2)[3], colour=as.factor(df2[,1])),pch=2,size=1) +
+    scale_color_manual(name=paste(as.character(colnames(df1)[1])), values = rainbow(14)) +
+    theme_bw() + scale_size_manual(name="Data type", values=c(1,2)) +
+    annotate("text", x = (min(df1[,2])*4), y = (max(df1[,3])*0.9), size = font.size-8, 
+             label = paste("Dots = Predicted", "\nTriangles = Harvest")) +
+    theme(legend.title = element_text(colour="black", size=font.size-3)) +
+    theme(legend.text = element_text(colour="black", size = font.size-5)) +
+    theme(legend.position = c(0.8,0.3)) + theme(legend.key = element_blank()) +
+    theme(text = element_text(size=font.size)) +
+    theme(axis.title.x = element_text(size = font.size)) + theme(axis.title.y = element_text(size = font.size)) +
+    theme(legend.key.height=unit(0.5,"line")) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  output = plots
+}
+plots[[1]] = plot.fun1(height.dia[,c("Date","D","Leafarea")], harvest.data[,c("Date","D","Leafarea")], font.size)
+plots[[3]] = plot.fun1(height.dia[,c("Date","D","Leafmass")], harvest.data[,c("Date","D","Leafmass")], font.size)
+plots[[5]] = plot.fun1(height.dia[,c("Date","D","Stemmass")], harvest.data[,c("Date","D","Stemmass")], font.size)
+plots[[7]] = plot.fun1(height.dia[,c("Date","D","Rootmass")], harvest.data[,c("Date","D","Rootmass")], font.size)
+
+plots[[2]] = plot.fun1(height.dia[,c("Date","Height","Leafarea")], harvest.data[,c("Date","Height","Leafarea")], font.size)
+plots[[4]] = plot.fun1(height.dia[,c("Date","Height","Leafmass")], harvest.data[,c("Date","Height","Leafmass")], font.size)
+plots[[6]] = plot.fun1(height.dia[,c("Date","Height","Stemmass")], harvest.data[,c("Date","Height","Stemmass")], font.size)
+plots[[8]] = plot.fun1(height.dia[,c("Date","Height","Rootmass")], harvest.data[,c("Date","Height","Rootmass")], font.size)
+
+pdf(file = "Output/5.tree_attributes_logscale_over_time.pdf")
+grid.arrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]])
+grid.arrange(plots[[5]],plots[[6]],plots[[7]],plots[[8]])
+dev.off()
+#-----------------------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------------------
+# Plot all data  (harvested and predicted) with room (temperature) variation
+plots = list() 
+plots[[1]] = plot.fun1(height.dia[,c("Room","D","Leafarea")], harvest.data[,c("Room","D","Leafarea")], font.size)
+plots[[3]] = plot.fun1(height.dia[,c("Room","D","Leafmass")], harvest.data[,c("Room","D","Leafmass")], font.size)
+plots[[5]] = plot.fun1(height.dia[,c("Room","D","Stemmass")], harvest.data[,c("Room","D","Stemmass")], font.size)
+plots[[7]] = plot.fun1(height.dia[,c("Room","D","Rootmass")], harvest.data[,c("Room","D","Rootmass")], font.size)
+
+plots[[2]] = plot.fun1(height.dia[,c("Room","Height","Leafarea")], harvest.data[,c("Room","Height","Leafarea")], font.size)
+plots[[4]] = plot.fun1(height.dia[,c("Room","Height","Leafmass")], harvest.data[,c("Room","Height","Leafmass")], font.size)
+plots[[6]] = plot.fun1(height.dia[,c("Room","Height","Stemmass")], harvest.data[,c("Room","Height","Stemmass")], font.size)
+plots[[8]] = plot.fun1(height.dia[,c("Room","Height","Rootmass")], harvest.data[,c("Room","Height","Rootmass")], font.size)
+
+pdf(file = "Output/6.tree_attributes_logscale_with_temperature.pdf")
+grid.arrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]])
+grid.arrange(plots[[5]],plots[[6]],plots[[7]],plots[[8]])
+dev.off()
+#-----------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------
 
 

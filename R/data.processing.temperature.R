@@ -191,118 +191,212 @@ harvest.data = harvest.data[with(harvest.data, order(Rootmass)), ]
 
 #-----------------------------------------------------------------------------------------
 ################### Linear regression model fitting [log(stem_mass) = b(1) + b(2)*log(dia) + b(3)*log(height)]
-# Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
+# Model fits for individual temperature treatments
 # Units are: masses = g; height = cm; dia = mm, leafarea = cm^2
-model.fit = data.frame(harvest.data$Date, harvest.data$Code, harvest.data$Height, harvest.data$D, harvest.data$Leafarea, harvest.data$Leafmass, harvest.data$Stemmass, harvest.data$Rootmass)
-names(model.fit) = c("Date", "Code", "Height", "D", "Leafarea", "Leafmass", "Stemmass", "Rootmass")
+height.dia = height.dia[with(height.dia, order(Room)), ]
+# model.summary = data.frame(Model = as.factor(c("sm","rm","lm","la","sm.comb","rm.comb","lm.comb","la.comb")), 
+#                            RMSE = numeric(8), error = numeric(8))
+model.rmse = data.frame(attributes = as.factor(c("sm","rm","lm","la")),
+                        rmse.individual = numeric(4), rmse.combined = numeric(4))
+model.error = data.frame(attributes = as.factor(c("sm","rm","lm","la")),
+                         error.individual = numeric(4), error.combined = numeric(4))
+# model.rmse<- model.rmse[seq(dim(model.rmse)[1],1),]
+# model.error<- model.error[seq(dim(model.error)[1],1),]
 
-fit.sm <- lm(log(Stemmass) ~ log(D) + log(Height), data=model.fit)
-summary(fit.sm) # show results
-# R = data.frame(D = model.fit$D, Height = model.fit$Height, Stemmass = model.fit$Stemmass, Fitted = exp(fitted(fit.sm)))
-
-rmse.sm = sqrt( mean( (exp(fitted(fit.sm)) - model.fit$Stemmass)^2) )
-percentage.error.sm = rmse.sm / mean(model.fit$Stemmass) * 100 #Percentage Error
-# percentage.error.sm = (sqrt ( sum((model.fit$Stemmass - exp(fitted(fit.sm)))**2) / (length(fit.sm$residuals) - length(fit.sm$coefficients)))) / mean(model.fit$Stemmass) * 100 #Percentage Error
-cat("Linear regression model fitting: log(stem_mass) =", coefficients(fit.sm)[1], "+", coefficients(fit.sm)[2], 
-    "* log(diameter) +", coefficients(fit.sm)[3], "* log(height) \nwith percentage error =", percentage.error.sm, "%")
-
-# Estimate the stemmass from the fitted linear regression equation
-eq = function(x,y){exp(coefficients(fit.sm)[1] + coefficients(fit.sm)[2] * log(x)  + coefficients(fit.sm)[3] * log(y))}
-
-# Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
-height.dia$Stemmass = eq(height.dia$D,height.dia$Height)
+fit.sm = list()
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  harvest.data.ind = subset(harvest.data, Room %in% i)
+  height.dia.ind = subset(height.dia, Room %in% i)
+  fit.sm[[i]] <- lm(log(Stemmass) ~ log(D) + log(Height), data=harvest.data.ind)
+  # summary(fit.sm[[i]])
+  # Estimate the stemmass from the fitted linear regression equation
+  eq = function(x,y){exp(coefficients(fit.sm[[i]])[1] + coefficients(fit.sm[[i]])[2] * log(x)  + coefficients(fit.sm[[i]])[3] * log(y))}
+  
+  # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
+  height.dia$Stemmass[(1+(i-1)*nrow(height.dia.ind)):(i*nrow(height.dia.ind))] = eq(height.dia.ind$D,height.dia.ind$Height)
+  if (i == 1) {
+    rmse.sm = sum ((exp(fitted(fit.sm[[i]])) - harvest.data.ind$Stemmass)^2)
+    }
+  if (i > 1) {
+    rmse.sm = rmse.sm + sum((exp(fitted(fit.sm[[i]])) - harvest.data.ind$Stemmass)^2)
+    }
+}
+model.rmse$rmse.individual[1] = sqrt( ( rmse.sm ) / nrow(harvest.data))
+model.error$error.individual[1] = model.rmse$rmse.individual[1] / mean(harvest.data$Stemmass) * 100 #Percentage Error
 
 #-----------------------------------------------------------------------------------------
 
 ################### Linear regression model fitting [log(root_mass) = b(1) + b(2)*log(dia) + b(3)*log(height)]
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
 # Units are: masses = g; height = cm; dia = mm
-fit.rm <- lm(log(Rootmass) ~ log(D) + log(Height), data=model.fit)
-summary(fit.rm) # show results
-rmse.rm = sqrt( mean( (exp(fitted(fit.rm)) - model.fit$Rootmass)^2) )
-percentage.error.rm = rmse.rm / mean(model.fit$Rootmass) * 100 #Percentage Error
-# percentage.error.rm = (sqrt ( sum((model.fit$Rootmass - exp(fitted(fit.rm)))**2) / (length(fit.rm$residuals) - length(fit.rm$coefficients)))) / mean(model.fit$Rootmass) * 100 #Percentage Error
-cat("Linear regression model fitting: log(root_mass) = ", coefficients(fit.rm)[1], "+", coefficients(fit.rm)[2], 
-    "* log(diameter) +", coefficients(fit.rm)[3], "* log(height) \nwith percentage error =", percentage.error.rm, "%")
+fit.rm = list()
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  harvest.data.ind = subset(harvest.data, Room %in% i)
+  height.dia.ind = subset(height.dia, Room %in% i)
+  fit.rm[[i]] <- lm(log(Rootmass) ~ log(D) + log(Height), data=harvest.data.ind)
+  
+  # Estimate the stemmass from the fitted linear regression equation
+  eq = function(x,y){exp(coefficients(fit.rm[[i]])[1] + coefficients(fit.rm[[i]])[2] * log(x)  + coefficients(fit.rm[[i]])[3] * log(y))}
+  
+  # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
+  height.dia$Rootmass[(1+(i-1)*nrow(height.dia.ind)):(i*nrow(height.dia.ind))] = eq(height.dia.ind$D,height.dia.ind$Height)
+  if (i == 1) {
+    rmse.rm = sum ((exp(fitted(fit.rm[[i]])) - harvest.data.ind$Rootmass)^2)
+  }
+  if (i > 1) {
+    rmse.rm = rmse.rm + sum((exp(fitted(fit.rm[[i]])) - harvest.data.ind$Rootmass)^2)
+  }
+}
+model.rmse$rmse.individual[2] = sqrt( ( rmse.rm ) / nrow(harvest.data))
+model.error$error.individual[2] = model.rmse$rmse.individual[2] / mean(harvest.data$Rootmass) * 100 #Percentage Error
 
-# Estimate the stemmass from the fitted linear regression equation
-eq = function(x,y){exp(coefficients(fit.rm)[1] + coefficients(fit.rm)[2] * log(x)  + coefficients(fit.rm)[3] * log(y))}
-
-# Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
-height.dia$Rootmass = eq(height.dia$D,height.dia$Height)
 
 #-----------------------------------------------------------------------------------------
 ################### Linear regression model fitting [log(leaf_mass) = b(1) + b(2)*log(dia) + b(3)*log(height)]
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
 # Units are: masses = g; height = cm; dia = mm
-fit.lm <- lm(log(Leafmass) ~ log(D) + log(Height), data=model.fit)
-summary(fit.lm) # show results
-rmse.lm = sqrt( mean( (exp(fitted(fit.lm)) - model.fit$Leafmass)^2) )
-percentage.error.lm = rmse.lm / mean(model.fit$Leafmass) * 100 #Percentage Error
-# percentage.error.lm = (sqrt ( sum((model.fit$Leafmass - exp(fitted(fit.lm)))**2) / (length(fit.lm$residuals) - length(fit.lm$coefficients)))) / mean(model.fit$Leafmass) * 100 #Percentage Error
-cat("Linear regression model fitting: log(leaf_mass) = ", coefficients(fit.lm)[1], "+", coefficients(fit.lm)[2], 
-    "* log(diameter) +", coefficients(fit.lm)[3], "* log(height) \nwith percentage error =", percentage.error.lm, "%")
+fit.lm = list()
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  harvest.data.ind = subset(harvest.data, Room %in% i)
+  height.dia.ind = subset(height.dia, Room %in% i)
+  fit.lm[[i]] <- lm(log(Leafmass) ~ log(D) + log(Height), data=harvest.data.ind)
+  
+  # Estimate the stemmass from the fitted linear regression equation
+  eq = function(x,y){exp(coefficients(fit.lm[[i]])[1] + coefficients(fit.lm[[i]])[2] * log(x)  + coefficients(fit.lm[[i]])[3] * log(y))}
+  
+  # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
+  height.dia$Leafmass[(1+(i-1)*nrow(height.dia.ind)):(i*nrow(height.dia.ind))] = eq(height.dia.ind$D,height.dia.ind$Height)
+  if (i == 1) {
+    rmse.lm = sum ((exp(fitted(fit.lm[[i]])) - harvest.data.ind$Leafmass)^2)
+  }
+  if (i > 1) {
+    rmse.lm = rmse.lm + sum((exp(fitted(fit.lm[[i]])) - harvest.data.ind$Leafmass)^2)
+  }
+}
+model.rmse$rmse.individual[3] = sqrt( ( rmse.lm ) / nrow(harvest.data))
+model.error$error.individual[3] = model.rmse$rmse.individual[3] / mean(harvest.data$Leafmass) * 100 #Percentage Error
 
-# Estimate the stemmass from the fitted linear regression equation
-eq = function(x,y){exp(coefficients(fit.lm)[1] + coefficients(fit.lm)[2] * log(x)  + coefficients(fit.lm)[3] * log(y))}
-
-# Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
-height.dia$Leafmass = eq(height.dia$D,height.dia$Height)
 
 #-----------------------------------------------------------------------------------------
 ################### Linear regression model fitting [log(leaf_mass) = b(1) + b(2)*log(dia) + b(3)*log(height)]
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
 # Units are: masses = g; height = cm; dia = mm; leaf area = cm2
-fit.la <- lm(log(Leafarea) ~ log(D) + log(Height), data=model.fit)
-summary(fit.la) # show results
-# R = data.frame(D = model.fit$D, Height = model.fit$Height, Leafarea = model.fit$Leafarea, Fitted = exp(fitted(fit.la)))
-rmse.la = sqrt( mean( (exp(fitted(fit.la)) - model.fit$Leafarea)^2) )
-percentage.error.la = rmse.la / mean(model.fit$Leafarea) * 100 #Percentage Error
-# percentage.error.la = (sqrt ( sum((model.fit$Leafarea - exp(fitted(fit.la)))**2) / (length(fit.la$residuals) - length(fit.la$coefficients)))) / mean(model.fit$Leafarea) * 100 #Percentage Error
-cat("Linear regression model fitting: log(leaf_area) = ", coefficients(fit.la)[1], "+", coefficients(fit.la)[2], 
-    "* log(diameter) +", coefficients(fit.la)[3], "* log(height)\nwith percentage error =", percentage.error.la, "%")
+fit.la = list()
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  harvest.data.ind = subset(harvest.data, Room %in% i)
+  height.dia.ind = subset(height.dia, Room %in% i)
+  fit.la[[i]] <- lm(log(Leafarea) ~ log(D) + log(Height), data=harvest.data.ind)
+  
+  # Estimate the stemmass from the fitted linear regression equation
+  eq = function(x,y){exp(coefficients(fit.la[[i]])[1] + coefficients(fit.la[[i]])[2] * log(x)  + coefficients(fit.la[[i]])[3] * log(y))}
+  
+  # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
+  height.dia$Leafarea[(1+(i-1)*nrow(height.dia.ind)):(i*nrow(height.dia.ind))] = eq(height.dia.ind$D,height.dia.ind$Height)
+  if (i == 1) {
+    rmse.la = sum (((exp(fitted(fit.la[[i]])) - harvest.data.ind$Leafarea)/100)^2) # unit consersion from cm2 to dm2
+  }
+  if (i > 1) {
+    rmse.la = rmse.la + sum(((exp(fitted(fit.la[[i]])) - harvest.data.ind$Leafarea)/100)^2) # unit consersion from cm2 to dm2
+  }
+}
+model.rmse$rmse.individual[4] = sqrt( ( rmse.la ) / nrow(harvest.data))
+model.error$error.individual[4] = model.rmse$rmse.individual[4] / (mean(harvest.data$Leafarea)/100) * 100 #Percentage Error
 
-# Estimate the stemmass from the fitted linear regression equation
-eq = function(x,y){exp(coefficients(fit.la)[1] + coefficients(fit.la)[2] * log(x)  + coefficients(fit.la)[3] * log(y))}
 
-# Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
-height.dia$Leafarea = eq(height.dia$D,height.dia$Height)
 #-----------------------------------------------------------------------------------------
+# Model fits for all combined temperature treatments
+# Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
+fit.sm.combined <- lm(log(Stemmass) ~ log(D) + log(Height), data=harvest.data)
+# summary(fit.sm.combined) # show results
+model.rmse$rmse.combined[1] = sqrt( mean( (exp(fitted(fit.sm.combined)) - harvest.data$Stemmass)^2) )
+model.error$error.combined[1] = model.rmse$rmse.combined[1] / mean(harvest.data$Stemmass) * 100 #Percentage Error
+# cat("Linear regression model fitting: log(stem_mass) =", coefficients(fit.sm.combined)[1], "+", coefficients(fit.sm.combined)[2],
+#     "* log(diameter) +", coefficients(fit.sm.combined)[3], "* log(height) \nwith percentage error =", percentage.error.sm, "%")
 
+# # Estimate the stemmass from the fitted linear regression equation
+# eq = function(x,y){exp(coefficients(fit.sm.combined)[1] + coefficients(fit.sm.combined)[2] * log(x)  + coefficients(fit.sm.combined)[3] * log(y))}
+# 
+# # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
+# height.dia$Stemmass.comb = eq(height.dia$D,height.dia$Height)
+
+
+fit.rm.combined <- lm(log(Rootmass) ~ log(D) + log(Height), data=harvest.data)
+# summary(fit.rm) # show results
+model.rmse$rmse.combined[2] = sqrt( mean( (exp(fitted(fit.rm.combined)) - harvest.data$Rootmass)^2) )
+model.error$error.combined[2] = model.rmse$rmse.combined[2] / mean(harvest.data$Rootmass) * 100 #Percentage Error
+# percentage.error.rm = (sqrt ( sum((harvest.data$Rootmass - exp(fitted(fit.rm)))**2) / (length(fit.rm$residuals) - length(fit.rm$coefficients)))) / mean(harvest.data$Rootmass) * 100 #Percentage Error
+# cat("Linear regression model fitting: log(root_mass) = ", coefficients(fit.rm.combined)[1], "+", coefficients(fit.rm.combined)[2],
+#     "* log(diameter) +", coefficients(fit.rm.combined)[3], "* log(height) \nwith percentage error =", percentage.error.rm, "%")
+
+# # Estimate the stemmass from the fitted linear regression equation
+# eq = function(x,y){exp(coefficients(fit.rm.combined)[1] + coefficients(fit.rm.combined)[2] * log(x)  + coefficients(fit.rm.combined)[3] * log(y))}
+# 
+# # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
+# height.dia$Rootmass.comb = eq(height.dia$D,height.dia$Height)
+
+fit.lm.combined <- lm(log(Leafmass) ~ log(D) + log(Height), data=harvest.data)
+# summary(fit.lm) # show results
+model.rmse$rmse.combined[3] = sqrt( mean( (exp(fitted(fit.lm.combined)) - harvest.data$Leafmass)^2) )
+model.error$error.combined[3] = model.rmse$rmse.combined[3] / mean(harvest.data$Leafmass) * 100 #Percentage Error
+# percentage.error.lm = (sqrt ( sum((harvest.data$Leafmass - exp(fitted(fit.lm)))**2) / (length(fit.lm$residuals) - length(fit.lm$coefficients)))) / mean(harvest.data$Leafmass) * 100 #Percentage Error
+# cat("Linear regression model fitting: log(leaf_mass) = ", coefficients(fit.lm.combined)[1], "+", coefficients(fit.lm.combined)[2],
+#     "* log(diameter) +", coefficients(fit.lm.combined)[3], "* log(height) \nwith percentage error =", percentage.error.lm, "%")
+
+# # Estimate the stemmass from the fitted linear regression equation
+# eq = function(x,y){exp(coefficients(fit.lm.combined)[1] + coefficients(fit.lm.combined)[2] * log(x)  + coefficients(fit.lm.combined)[3] * log(y))}
+# 
+# # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
+# height.dia$Leafmass.comb = eq(height.dia$D,height.dia$Height)
+
+fit.la.combined <- lm(log(Leafarea) ~ log(D) + log(Height), data=harvest.data)
+# summary(fit.la) # show results
+# R = data.frame(D = harvest.data$D, Height = harvest.data$Height, Leafarea = harvest.data$Leafarea, Fitted = exp(fitted(fit.la)))
+model.rmse$rmse.combined[4] = sqrt( mean( ((exp(fitted(fit.la.combined)) - harvest.data$Leafarea)/100)^2) )
+model.error$error.combined[4] = model.rmse$rmse.combined[4] / (mean(harvest.data$Leafarea)/100) * 100 #Percentage Error
+# percentage.error.la = (sqrt ( sum((harvest.data$Leafarea - exp(fitted(fit.la)))**2) / (length(fit.la$residuals) - length(fit.la$coefficients)))) / mean(harvest.data$Leafarea) * 100 #Percentage Error
+# cat("Linear regression model fitting: log(leaf_area) = ", coefficients(fit.la.combined)[1], "+", coefficients(fit.la.combined)[2],
+#     "* log(diameter) +", coefficients(fit.la.combined)[3], "* log(height)\nwith percentage error =", percentage.error.la, "%")
+
+# # Estimate the stemmass from the fitted linear regression equation
+# eq = function(x,y){exp(coefficients(fit.la.combined)[1] + coefficients(fit.la.combined)[2] * log(x)  + coefficients(fit.la.combined)[3] * log(y))}
+# 
+# # Calculate all seedling stem mass from height and diameter using the linear model and then get the SEs from the 7 replicas
+# height.dia$Leafarea.comb = eq(height.dia$D,height.dia$Height)
+#-----------------------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------------------
 # Plotting observation and modelled data
 plots = list() 
 par(mfrow = c(2, 2))
 plot(height.dia$Height,height.dia$Stemmass,col="red",main="Height vs Stemmass", pch=15, xlab="Height (cm)", ylab="Stemmass (g DM)")
-lines(model.fit$Height,model.fit$Stemmass,type="p", col="green", pch=20)
+lines(harvest.data$Height,harvest.data$Stemmass,type="p", col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 # dev.off()
-# rmse.stemmass.height = sqrt(mean((eq(model.fit$D,model.fit$Height)-model.fit$Stemmass)^2,na.rm=TRUE))
+# rmse.stemmass.height = sqrt(mean((eq(harvest.data$D,harvest.data$Height)-harvest.data$Stemmass)^2,na.rm=TRUE))
 
 plot(height.dia$D,height.dia$Stemmass, col="red", main="Diameter vs Stemmass", pch=16, xlab="Diameter (mm)", ylab="Stemmass (g DM)")
-lines(model.fit$D,model.fit$Stemmass,type="p",col="green", pch=20)
+lines(harvest.data$D,harvest.data$Stemmass,type="p",col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 # dev.off()
 # plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
-# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
+# lines(harvest.data$Height,harvest.data$D,type="p",col="green", pch=20)
 # legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 #-----------------------------------------------------------------------------------------
 
 # Plotting observation and modelled data
 # png(file = "Output/2.Height_Rootmass.png")
 plot(height.dia$Height,height.dia$Rootmass,col="red",main="Height vs Rootmass", pch=15, xlab="Height (cm)", ylab="Rootmass (g DM)")
-lines(model.fit$Height,model.fit$Rootmass,type="p", col="green", pch=20)
+lines(harvest.data$Height,harvest.data$Rootmass,type="p", col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 # dev.off()
 # png(file = "Output/2.Diameter_Rootmass.png")
 plot(height.dia$D,height.dia$Rootmass, col="red", main="Diameter vs Rootmass", pch=16, xlab="Diameter (mm)", ylab="Rootmass (g DM)")
-lines(model.fit$D,model.fit$Rootmass,type="p",col="green", pch=20)
+lines(harvest.data$D,harvest.data$Rootmass,type="p",col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 plots[[1]] = recordPlot()
 # dev.off()
 # plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
-# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
+# lines(harvest.data$Height,harvest.data$D,type="p",col="green", pch=20)
 # legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 
 #-----------------------------------------------------------------------------------------
@@ -310,33 +404,33 @@ plots[[1]] = recordPlot()
 # png(file = "Output/3.Height_Leafmass.png")
 par(mfrow = c(2, 2))
 plot(height.dia$Height,height.dia$Leafmass,col="red",main="Height vs Leafmass", pch=15, xlab="Height (cm)", ylab="Leafmass (g DM)")
-lines(model.fit$Height,model.fit$Leafmass,type="p", col="green", pch=20)
+lines(harvest.data$Height,harvest.data$Leafmass,type="p", col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 # dev.off()
 # png(file = "Output/3.Diameter_Leafmass.png")
 plot(height.dia$D,height.dia$Leafmass, col="red", main="Diameter vs Leafmass", pch=16, xlab="Diameter (mm)", ylab="Leafmass (g DM)")
-lines(model.fit$D,model.fit$Leafmass,type="p",col="green", pch=20)
+lines(harvest.data$D,harvest.data$Leafmass,type="p",col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 # dev.off()
 # plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
-# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
+# lines(harvest.data$Height,harvest.data$D,type="p",col="green", pch=20)
 # legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 
 #-----------------------------------------------------------------------------------------
 # Plotting observation and modelled data
 # png(file = "Output/4.Height_Leafarea.png")
 plot(height.dia$Height,height.dia$Leafarea,col="red",main="Height vs Leafarea", pch=15, xlab="Height (cm)", ylab="Leafarea" ~ (cm^{2}))
-lines(model.fit$Height,model.fit$Leafarea,type="p", col="green", pch=20)
+lines(harvest.data$Height,harvest.data$Leafarea,type="p", col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 # dev.off()
 # png(file = "Output/4.Diameter_Leafarea.png")
 plot(height.dia$D,height.dia$Leafarea, col="red", main="Diameter vs Leafarea", pch=16, xlab="Diameter (mm)", ylab="Leafarea" ~ (cm^{2}))
-lines(model.fit$D,model.fit$Leafarea,type="p",col="green", pch=20)
+lines(harvest.data$D,harvest.data$Leafarea,type="p",col="green", pch=20)
 legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 plots[[2]] = recordPlot()
 # dev.off()
 # plot(y,x,col="red",main="Height vs Diameter", pch=17, xlab="Height (cm)", ylab="Diameter (cm)")
-# lines(model.fit$Height,model.fit$D,type="p",col="green", pch=20)
+# lines(harvest.data$Height,harvest.data$D,type="p",col="green", pch=20)
 # legend('topleft', c("Measurements", "Modelled"), lty=1, col=c('green','red'), bty='n', cex=0.75)
 
 pdf(file = "Output/1.tree_attributes_over_time.pdf")
@@ -347,71 +441,258 @@ dev.off()
 
 
 #-----------------------------------------------------------------------------------------
-# summerizing the model fits
-model.summary = data.frame(Model = as.character(c("fit.sm","fit.rm","fit.lm","fit.la")), Adjusted.R.squared = c(summary(fit.sm)$adj.r.squared,summary(fit.rm)$adj.r.squared,
-                                                                                                                summary(fit.lm)$adj.r.squared,summary(fit.la)$adj.r.squared), 
-                           Residual.standard.error = c(sigma(fit.sm),sigma(fit.rm),sigma(fit.lm),sigma(fit.la)), percentage.error = c(percentage.error.sm,percentage.error.rm,percentage.error.lm,percentage.error.la))
-
+# summerizing the model fits for combined models
+# model.summary = data.frame(Model = as.character(c("fit.sm","fit.rm","fit.lm","fit.la")), Adjusted.R.squared = c(summary(fit.sm)$adj.r.squared,summary(fit.rm)$adj.r.squared,
+#                                                                                                                 summary(fit.lm)$adj.r.squared,summary(fit.la)$adj.r.squared),
+#                            Residual.standard.error = c(sigma(fit.sm),sigma(fit.rm),sigma(fit.lm),sigma(fit.la)), percentage.error = c(percentage.error.sm,percentage.error.rm,percentage.error.lm,percentage.error.la))
 # Plot measuremnts vs fitted points to judge the model fits
 # png(file = "Output/model_fit.png")
 par(mfrow=c(2,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0))
-plot(exp(fitted(fit.sm)), model.fit$Stemmass, col="red", pch=16, xlab="Fitted stem mass (g)", ylab="Measured stem mass (g)")
-abline(0, 1) 
-text(min(exp(fitted(fit.sm))), max(model.fit$Stemmass)*0.9, paste("Adj R-squared =", format(round(summary(fit.sm)$adj.r.squared, 2)), 
-                                                                  "\nResidual SE =", format(round(sigma(fit.sm), 2)), "\n% Error =", format(round(percentage.error.sm,1))), pos = 4)
+plot(exp(fitted(fit.sm.combined)), harvest.data$Stemmass, col=rainbow(length(harvest.data$Room))[rank(harvest.data$Room)], pch=16, xlab="Fitted stem mass (g)", ylab="Measured stem mass (g)")
+abline(0, 1)
+text(min(exp(fitted(fit.sm.combined))), max(harvest.data$Stemmass)*0.9, paste("Adj R-squared =", format(round(summary(fit.sm.combined)$adj.r.squared, 2)),
+                                                                     "\nResidual SE =", format(round(sigma(fit.sm.combined), 2))), pos = 4)
+legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data$Room))),pch=19,
+       bty="n",ncol=2,cex=0.8,pt.cex=1.2)
 
-plot(exp(fitted(fit.rm)), model.fit$Rootmass, col="green", pch=16, xlab="Fitted root mass (g)", ylab="Measured root mass (g)")
-abline(0, 1) 
-text(min(exp(fitted(fit.rm))), max(model.fit$Rootmass)*0.9, paste("Adj R-squared =", format(round(summary(fit.rm)$adj.r.squared, 2)), 
-                                                                  "\nResidual SE =", format(round(sigma(fit.rm), 2)), "\n% Error =", format(round(percentage.error.rm,1))), pos = 4)
-plot(exp(fitted(fit.lm)), model.fit$Leafmass, col="blue", pch=16, xlab="Fitted leaf mass (g)", ylab="Measured leaf mass (g)")
-abline(0, 1) 
-text(min(exp(fitted(fit.lm))), max(model.fit$Leafmass)*0.9, paste("Adj R-squared =", format(round(summary(fit.lm)$adj.r.squared, 2)), 
-                                                                  "\nResidual SE =", format(round(sigma(fit.lm), 2)), "\n% Error =", format(round(percentage.error.lm,1))), pos = 4)
-plot(exp(fitted(fit.la)), model.fit$Leafarea, col="black", pch=16, xlab = expression("Fitted leaf area" ~ (cm^{2})), ylab="Measured leaf area" ~ (cm^{2}))
-abline(0, 1) 
-text(min(exp(fitted(fit.la))), max(model.fit$Leafarea)*0.9, paste("Adj R-squared =", format(round(summary(fit.la)$adj.r.squared, 2)), 
-                                                                  "\nResidual SE =", format(round(sigma(fit.la), 2)), "\n% Error =", format(round(percentage.error.la,1))), pos = 4)
+plot(exp(fitted(fit.rm.combined)), harvest.data$Rootmass, col=harvest.data$Room, pch=16, xlab="Fitted root mass (g)", ylab="Measured root mass (g)")
+abline(0, 1)
+text(min(exp(fitted(fit.rm.combined))), max(harvest.data$Rootmass)*0.9, paste("Adj R-squared =", format(round(summary(fit.rm.combined)$adj.r.squared, 2)),
+                                                                     "\nResidual SE =", format(round(sigma(fit.rm.combined), 2))), pos = 4)
+legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data$Room))),pch=19,
+       bty="n",ncol=2,cex=0.8,pt.cex=1.2)
+
+plot(exp(fitted(fit.lm.combined)), harvest.data$Leafmass, col=harvest.data$Room, pch=16, xlab="Fitted leaf mass (g)", ylab="Measured leaf mass (g)")
+abline(0, 1)
+text(min(exp(fitted(fit.lm.combined))), max(harvest.data$Leafmass)*0.9, paste("Adj R-squared =", format(round(summary(fit.lm.combined)$adj.r.squared, 2)),
+                                                                     "\nResidual SE =", format(round(sigma(fit.lm.combined), 2))), pos = 4)
+legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data$Room))),pch=19,
+       bty="n",ncol=2,cex=0.8,pt.cex=1.2)
+
+plot(exp(fitted(fit.la.combined)), harvest.data$Leafarea, col=harvest.data$Room, pch=16, xlab = expression("Fitted leaf area" ~ (cm^{2})), ylab="Measured leaf area" ~ (cm^{2}))
+abline(0, 1)
+text(min(exp(fitted(fit.la.combined))), max(harvest.data$Leafarea)*0.9, paste("Adj R-squared =", format(round(summary(fit.la.combined)$adj.r.squared, 2)),
+                                                                     "\nResidual SE =", format(round(sigma(fit.la.combined), 2))), pos = 4)
+legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data$Room))),pch=19,
+       bty="n",ncol=2,cex=0.8,pt.cex=1.2)
 plots[[3]] = recordPlot()
 # dev.off()
 
 # plot residuals against fitted values and quantile-quantile plot
 # png(file = "Output/model_residuals.png", units="px", width=1500, height=2000, res=300)
 par(mfrow=c(4,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0))
+plot(resid(fit.sm.combined) ~ exp(fitted(fit.sm.combined)), col=harvest.data$Room, xlab="Fitted stem mass (g)", ylab="Residual stem mass (g)")
+abline(h=0)
+qqPlot(residuals(fit.sm.combined), ylab="Residual stem mass (g)")
+legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data$Room))),pch=19,
+       bty="n",ncol=4,cex=0.8,pt.cex=1.2)
 
-plot(resid(fit.sm) ~ exp(fitted(fit.sm)), col="red", xlab="Fitted stem mass (g)", ylab="Residual stem mass (g)")
+plot(resid(fit.rm.combined) ~ exp(fitted(fit.rm.combined)), col=harvest.data$Room, xlab="Fitted root mass (g)", ylab="Residual root mass (g)")
 abline(h=0)
-qqPlot(residuals(fit.sm), ylab="Residual stem mass (g)")
-plot(resid(fit.rm) ~ exp(fitted(fit.rm)), col="green", xlab="Fitted root mass (g)", ylab="Residual root mass (g)")
+qqPlot(residuals(fit.rm.combined), ylab="Residual stem mass (g)")
+legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data$Room))),pch=19,
+       bty="n",ncol=4,cex=0.8,pt.cex=1.2)
+
+plot(resid(fit.lm.combined) ~ exp(fitted(fit.lm.combined)), col=harvest.data$Room, xlab="Fitted leaf mass (g)", ylab="Residual leaf mass (g)")
 abline(h=0)
-qqPlot(residuals(fit.rm), ylab="Residual stem mass (g)")
-plot(resid(fit.lm) ~ exp(fitted(fit.lm)), col="blue", xlab="Fitted leaf mass (g)", ylab="Residual leaf mass (g)")
+qqPlot(residuals(fit.lm.combined), ylab="Residual leaf mass (g)")
+legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data$Room))),pch=19,
+       bty="n",ncol=4,cex=0.8,pt.cex=1.2)
+
+plot(resid(fit.la.combined) ~ exp(fitted(fit.la.combined)), col=harvest.data$Room, xlab = expression("Fitted leaf area" ~ (cm^{2})), ylab="Residual leaf area" ~ (mm^{2}))
 abline(h=0)
-qqPlot(residuals(fit.lm), ylab="Residual leaf mass (g)")
-plot(resid(fit.la) ~ exp(fitted(fit.la)), col="black", xlab = expression("Fitted leaf area" ~ (cm^{2})), ylab="Residual leaf area" ~ (mm^{2}))
-abline(h=0)
-qqPlot(residuals(fit.la), ylab="Residual leaf area" ~ (cm^{2}))
+qqPlot(residuals(fit.la.combined), ylab="Residual leaf area" ~ (cm^{2}))
+legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data$Room))),pch=19,
+       bty="n",ncol=4,cex=0.8,pt.cex=1.2)
 plots[[4]] = recordPlot()
-# dev.off() 
+# dev.off()
 
 pdf(file = "Output/3.model_attributes.pdf")
 plots[[3]]
 plots[[4]]
 dev.off()
 #-----------------------------------------------------------------------------------------
-# setwd("Output")
-# plots1 <- lapply(ll <- list.files(pattern='.*[.]png'),function(x){
-#   img <- as.raster(readPNG(x))
-#   rasterGrob(img, interpolate = FALSE)
-# })
-# ggsave("Summary_plots.pdf", marrangeGrob(grobs=plots1, nrow=2, ncol=2))
 
 
+
+#-----------------------------------------------------------------------------------------
+# Plot measuremnts vs fitted points to judge the model fits
+plots = list()
+palette = c("#FF0000FF", "yellow3", "#00FF00FF", "#00FFFFFF", "#0000FFFF", "#FF00FFFF")
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  harvest.data.ind = subset(harvest.data, Room %in% i)
+  
+  par(mfrow=c(2,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0), oma=c(0,0,1,0))
+  plot(exp(fitted(fit.sm[[i]])), harvest.data.ind$Stemmass, col=palette[i], pch=16, xlab="Fitted stem mass (g)", ylab="Measured stem mass (g)")
+  abline(0, 1) 
+  text(min(exp(fitted(fit.sm[[i]]))), max(harvest.data.ind$Stemmass)*0.85, 
+       paste("Adj R-squared =", format(round(summary(fit.sm[[i]])$adj.r.squared, 2)),
+             "\nResidual SE =", format(round(sigma(fit.sm[[i]]), 2)),
+             "\nlog(SM) =", format(round(coefficients(fit.sm[[i]])[1],2)), "+", format(round(coefficients(fit.sm[[i]])[2],2)),
+             "* log(D)\n+", format(round(coefficients(fit.sm[[i]])[3],2)), "* log(H)"), pos = 4)
+  # cat("Linear regression model fitting: log(leaf_area) = ", coefficients(fit.la.combined)[1], "+", coefficients(fit.la.combined)[2],
+  #     "* log(diameter) +", coefficients(fit.la.combined)[3], "* log(height)\nwith percentage error =", percentage.error.la, "%")
+  
+  # legend('bottomright',legend=sort(unique(harvest.data.ind$Room)),title="Rooms",lty=NULL,col=palette[i],pch=19,
+  #        bty="n",ncol=2,cex=0.8,pt.cex=1.2)
+
+  plot(exp(fitted(fit.rm[[i]])), harvest.data.ind$Rootmass, col=palette[i], pch=16, xlab="Fitted root mass (g)", ylab="Measured root mass (g)")
+  abline(0, 1) 
+  text(min(exp(fitted(fit.rm[[i]]))), max(harvest.data.ind$Rootmass)*0.85, 
+       paste("Adj R-squared =", format(round(summary(fit.rm[[i]])$adj.r.squared, 2)),
+             "\nResidual SE =", format(round(sigma(fit.rm[[i]]), 2)),
+             "\nlog(SM) =", format(round(coefficients(fit.rm[[i]])[1],2)), "+", format(round(coefficients(fit.rm[[i]])[2],2)),
+             "* log(D)\n+", format(round(coefficients(fit.rm[[i]])[3],2)), "* log(H)"), pos = 4)
+  # legend('bottomright',legend=sort(unique(harvest.data.ind$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data.ind$Room))),pch=19,
+  #        bty="n",ncol=2,cex=0.8,pt.cex=1.2)
+  
+  plot(exp(fitted(fit.lm[[i]])), harvest.data.ind$Leafmass, col=palette[i], pch=16, xlab="Fitted leaf mass (g)", ylab="Measured leaf mass (g)")
+  abline(0, 1) 
+  text(min(exp(fitted(fit.lm[[i]]))), max(harvest.data.ind$Leafmass)*0.85, 
+       paste("Adj R-squared =", format(round(summary(fit.lm[[i]])$adj.r.squared, 2)),
+             "\nResidual SE =", format(round(sigma(fit.lm[[i]]), 2)),
+             "\nlog(SM) =", format(round(coefficients(fit.lm[[i]])[1],2)), "+", format(round(coefficients(fit.lm[[i]])[2],2)),
+             "* log(D)\n+", format(round(coefficients(fit.lm[[i]])[3],2)), "* log(H)"), pos = 4)
+  # legend('bottomright',legend=sort(unique(harvest.data$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data.ind$Room))),pch=19,
+  #        bty="n",ncol=2,cex=0.8,pt.cex=1.2)
+  
+  plot(exp(fitted(fit.la[[i]])), harvest.data.ind$Leafarea, col=palette[i], pch=16, xlab = expression("Fitted leaf area" ~ (cm^{2})), ylab="Measured leaf area" ~ (cm^{2}))
+  abline(0, 1) 
+  text(min(exp(fitted(fit.la[[i]]))), max(harvest.data.ind$Leafarea)*0.85, 
+       paste("Adj R-squared =", format(round(summary(fit.la[[i]])$adj.r.squared, 2)),
+             "\nResidual SE =", format(round(sigma(fit.la[[i]]), 2)),
+             "\nlog(SM) =", format(round(coefficients(fit.la[[i]])[1],2)), "+", format(round(coefficients(fit.la[[i]])[2],2)),
+             "* log(D)\n+", format(round(coefficients(fit.la[[i]])[3],2)), "* log(H)"), pos = 4)
+  legend('bottomright',legend=sort(unique(harvest.data.ind$Room)),title="Room",lty=NULL,col=palette[i],pch=19,
+         bty="n",ncol=1,cex=0.8,pt.cex=1.2)
+  mtext(paste("Model fits for individual temperature = room #",i), side = 3, line = -0.5, outer = TRUE)
+  plots[[1+(i-1)*2]] = recordPlot()
+  
+  # plot residuals against fitted values and quantile-quantile plot
+  # png(file = "Output/model_residuals.png", units="px", width=1500, height=2000, res=300)
+  par(mfrow=c(4,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0))
+  plot(resid(fit.sm[[i]]) ~ exp(fitted(fit.sm[[i]])), col=palette[i], xlab="Fitted stem mass (g)", ylab="Residual stem mass (g)")
+  abline(h=0)
+  qqPlot(residuals(fit.sm[[i]]), ylab="Residual stem mass (g)")
+  # legend('bottomright',legend=sort(unique(harvest.data.ind$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data.ind$Room))),pch=19,
+  #        bty="n",ncol=4,cex=0.8,pt.cex=1.2)
+  
+  plot(resid(fit.rm[[i]]) ~ exp(fitted(fit.rm[[i]])), col=palette[i], xlab="Fitted root mass (g)", ylab="Residual root mass (g)")
+  abline(h=0)
+  qqPlot(residuals(fit.rm[[i]]), ylab="Residual stem mass (g)")
+  # legend('bottomright',legend=sort(unique(harvest.data.ind$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data.ind$Room))),pch=19,
+  #        bty="n",ncol=4,cex=0.8,pt.cex=1.2)
+  
+  plot(resid(fit.lm[[i]]) ~ exp(fitted(fit.lm[[i]])), col=palette[i], xlab="Fitted leaf mass (g)", ylab="Residual leaf mass (g)")
+  abline(h=0)
+  qqPlot(residuals(fit.lm[[i]]), ylab="Residual leaf mass (g)")
+  # legend('bottomright',legend=sort(unique(harvest.data.ind$Room)),title="Rooms",lty=NULL,col=rainbow(length(unique(harvest.data.ind$Room))),pch=19,
+  #        bty="n",ncol=4,cex=0.8,pt.cex=1.2)
+  
+  plot(resid(fit.la[[i]]) ~ exp(fitted(fit.la[[i]])), col=palette[i], xlab = expression("Fitted leaf area" ~ (cm^{2})), ylab="Residual leaf area" ~ (mm^{2}))
+  abline(h=0)
+  qqPlot(residuals(fit.la[[i]]), ylab="Residual leaf area" ~ (cm^{2}))
+  legend('bottomright',legend=sort(unique(harvest.data.ind$Room)),title="Room",lty=NULL,col=palette[i],pch=19,
+         bty="n",ncol=1,cex=0.8,pt.cex=1.2)
+  mtext(paste("Model residuals for individual temperature = room #",i), side = 3, line = -0.5, outer = TRUE)
+  plots[[i*2]] = recordPlot()
+}
+pdf(file = "Output/3.model_attributes_rooms.pdf")
+plots
+dev.off()
+#-----------------------------------------------------------------------------------------
+
+
+
+#-----------------------------------------------------------------------------------------
+# Plot the comparison between both model structures
+model.rmse.melt <- melt(model.rmse, id.vars = "attributes")
+names(model.rmse.melt)[2] <- c("models")
+model.rmse.melt$variables = as.factor("rmse")
+model.error.melt <- melt(model.error, id.vars = "attributes")
+names(model.error.melt)[2] <- c("models")
+model.error.melt$variables = as.factor("error")
+model.summary = rbind(model.rmse.melt,model.error.melt)
+model.summary$models = ifelse(model.summary$models %in% as.factor(c("rmse.individual","error.individual")),"individual","combined")
+
+png("Output/3.compare_models_ind_comb_1.png", units="px", width=2000, height=1600, res=220)
+
+p1 = ggplot(data = model.summary, aes(x = attributes, y = value, group = models, fill = models)) +
+  # ggplot(data = bic.melt, aes(x=factor(bic.melt$Treatment, levels=unique(as.character(bic.melt$Treatment))), y=BIC, fill = Model_setting)) +
+  geom_bar(stat="identity", width = 0.5, position = "dodge") +
+  facet_wrap(~ variables, scales = "free") +
+  scale_fill_brewer(palette = "Set1", name = "Regression fitting") +
+  xlab("Seedling attributes") +
+  ylab("Model measures") +
+  # ggtitle("BIC for various model settings") +
+  theme_bw() +
+  scale_x_discrete(breaks=c("la","lm","rm","sm"), labels=c("Leafarea","Leafmass","Rootmass","Stemmass")) +
+  theme(legend.title = element_text(colour="black", size=10)) +
+  theme(legend.text = element_text(colour="black", size=10)) +
+  theme(legend.position = c(0.3,0.85)) +
+  theme(legend.key.height=unit(1,"line")) +
+  theme(legend.key = element_blank()) +
+  theme(text = element_text(size=12)) +
+  theme(axis.title.x = element_text(size = 12, vjust=-.2)) +
+  theme(axis.title.y = element_text(size = 12, vjust=0.3)) +
+  theme(axis.text.x = element_text(angle=45)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+print (p1)
+dev.off()
+
+#-----------------------------------------------------------------------------------------
+# Print and save the model comparison summary
+sink("Output/3.models_summary.txt")
+cat("Stemmass models:")
+cat("\n"); cat("Combined linear regression model:"); cat("\n")
+cat("log(Stemmass) = ", coefficients(fit.sm.combined)[1], "+", 
+    coefficients(fit.sm.combined)[2],"* log(Diameter) +", coefficients(fit.sm.combined)[3], "* log(Height)")
+cat("\n"); cat("\n"); cat("Individual linear regression models:"); cat("\n")
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  cat("log(Stemmass) = ", coefficients(fit.sm[[i]])[1], "+", 
+    coefficients(fit.sm[[i]])[2],"* log(Diameter) +", coefficients(fit.sm[[i]])[3], "* log(Height)")
+  cat("\n")
+}
+
+cat("\n"); cat("\n"); cat("Rootmass models:"); cat("\n")
+cat("Combined linear regression model:"); cat("\n")
+cat("log(Rootmass) = ", coefficients(fit.rm.combined)[1], "+", 
+    coefficients(fit.rm.combined)[2],"* log(Diameter) +", coefficients(fit.rm.combined)[3], "* log(Height)")
+cat("\n"); cat("\n"); cat("Individual linear regression models:"); cat("\n")
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  cat("log(Stemmass) = ", coefficients(fit.rm[[i]])[1], "+", 
+      coefficients(fit.rm[[i]])[2],"* log(Diameter) +", coefficients(fit.rm[[i]])[3], "* log(Height)")
+  cat("\n")
+}
+
+cat("\n"); cat("\n"); cat("Leafmass models:"); cat("\n")
+cat("Combined linear regression model:"); cat("\n")
+cat("log(Leafmass) = ", coefficients(fit.lm.combined)[1], "+", 
+    coefficients(fit.lm.combined)[2],"* log(Diameter) +", coefficients(fit.lm.combined)[3], "* log(Height)")
+cat("\n"); cat("\n"); cat("Individual linear regression models:"); cat("\n")
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  cat("log(Stemmass) = ", coefficients(fit.lm[[i]])[1], "+", 
+      coefficients(fit.lm[[i]])[2],"* log(Diameter) +", coefficients(fit.lm[[i]])[3], "* log(Height)")
+  cat("\n")
+}
+
+cat("\n"); cat("\n"); cat("Leafarea models:"); cat("\n")
+cat("Combined linear regression model:"); cat("\n")
+cat("log(Leafarea) = ", coefficients(fit.la.combined)[1], "+", 
+    coefficients(fit.la.combined)[2],"* log(Diameter) +", coefficients(fit.la.combined)[3], "* log(Height)")
+cat("\n"); cat("\n"); cat("Individual linear regression models:"); cat("\n")
+for (i in 1:(length(unique(harvest.data$Room))-1)) {
+  cat("log(Stemmass) = ", coefficients(fit.la[[i]])[1], "+", 
+      coefficients(fit.la[[i]])[2],"* log(Diameter) +", coefficients(fit.la[[i]])[3], "* log(Height)")
+  cat("\n")
+}
+sink()
+
+
+#-----------------------------------------------------------------------------------------
 # Save the stem mass data for MCMC CBM
 height.dia$W_treatment = NULL; height.dia$Comment = NULL
 write.csv(height.dia, file = "Output/Cleaf_Cstem_Croot.csv", row.names = FALSE)
-
-
 
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
@@ -462,7 +743,7 @@ for(i in 1:length(rooms)) {
     } else {
       final.harvest.idn.date = subset(final.harvest.idn, Date %in% as.Date(c("2016-02-22", "2016-02-23", "2016-02-24")))
     }
-      avg.harvest.data[nrow(avg.harvest.data)+1, c("Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
+    avg.harvest.data[nrow(avg.harvest.data)+1, c("Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
     avg.harvest.data[nrow(avg.harvest.data), c("Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE")] = (apply(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], 2, sd, na.rm = TRUE))/(nrow(final.harvest.idn.date))^0.5 # R9 = Standard error of leaf counts
     avg.harvest.data$Date[nrow(avg.harvest.data)] = mean(final.harvest.idn.date$Date)
     avg.harvest.data$Room[nrow(avg.harvest.data)] = rooms[i]
@@ -486,8 +767,8 @@ melted.harvest.data$Group = as.factor("Measured")
 keeps = c("Date","Room","Leafarea","Leafmass","Stemmass","Rootmass")
 height.dia.crop = height.dia[ , keeps, drop = FALSE]
 pred.data = data.frame(matrix(vector(), 0, 10,
-                                     dimnames=list(c(), c("Date", "Room", "Leafarea", "Leafarea_SE", "Leafmass", "Leafmass_SE", "Stemmass", "Stemmass_SE", "Rootmass", "Rootmass_SE"))),
-                              stringsAsFactors=F)
+                              dimnames=list(c(), c("Date", "Room", "Leafarea", "Leafarea_SE", "Leafmass", "Leafmass_SE", "Stemmass", "Stemmass_SE", "Rootmass", "Rootmass_SE"))),
+                       stringsAsFactors=F)
 pred.data$Date = as.Date(pred.data$Date)
 for(i in 1:length(rooms)) {
   height.dia.crop.idn = subset(height.dia.crop,Room==rooms[i]) 
@@ -561,39 +842,82 @@ keeps <- c("Date", "Room", "datatype", "Height", "D", "Leafarea", "Leafmass", "S
 avg.harvest.data.sampling = avg.harvest.data.sampling[ , keeps, drop = FALSE]
 unique(avg.harvest.data.sampling$Date)
 avg.harvest.data.sampling.1 = subset(avg.harvest.data.sampling, Date %in% 
-                                     as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10")))
+                                       as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10")))
 avg.harvest.data.sampling.2 = subset(avg.harvest.data.sampling, !(Date %in%
-                                       as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10"))))
+                                                                    as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10"))))
 plots = list() 
-plots[[1]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Date, y=D)) + geom_boxplot(aes(fill=datatype)) +
-  geom_jitter(size=0.5) +
+plots[[1]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=D)) + geom_boxplot(aes(fill=datatype)) +
+  geom_jitter(size=0.25) +
   facet_wrap( ~ Date, scales="free_x") +
-  xlab("Date") + ylab("Diameter") + ggtitle("Diameter over time") +
+  scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
+  xlab("Treatment room") + ylab("Diameter") + ggtitle("Diameter over time") +
   guides(fill=guide_legend(title="Data type")) +
-  theme_bw() + theme(legend.position = c(0.9,0.85))
-plots[[2]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Date, y=Height)) + geom_boxplot(aes(fill=datatype)) +
-  geom_jitter(size=0.5) +
-  facet_wrap( ~ Date, scales="free_x") +
-  xlab("Date") + ylab("Height") + ggtitle("Height over time") +
-  guides(fill=guide_legend(title="Data type")) +
-  theme_bw() + theme(legend.position = c(0.9,0.85))
+  theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
 
-plots[[3]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=D)) + geom_boxplot(aes(fill=datatype)) +
-  geom_jitter(size=0.5) +
+plots[[2]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=D, group=Room, colour=as.factor(Room))) + geom_boxplot(aes(fill=datatype)) +
+  geom_jitter(size=0.25) + 
+  labs(colour="Treatments") +
   facet_wrap( ~ Date, scales="free_x") +
-  xlab("Date") + ylab("Diameter") + ggtitle("Diameter over time") +
+  scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
+  xlab("Treatment room") + ylab("Diameter") + ggtitle("Diameter over time with treatments") +
   guides(fill=guide_legend(title="Data type")) +
-  theme_bw() + theme(legend.position = c(0.9,0.1))
-plots[[4]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=Height)) + geom_boxplot(aes(fill=datatype)) +
-  geom_jitter(size=0.5) +
+  theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
+
+plots[[3]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=Height)) + geom_boxplot(aes(fill=datatype)) +
+  geom_jitter(size=0.25) +
   facet_wrap( ~ Date, scales="free_x") +
-  xlab("Date") + ylab("Height") + ggtitle("Height over time") +
+  scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
+  xlab("Treatment room") + ylab("Height") + ggtitle("Height over time") +
   guides(fill=guide_legend(title="Data type")) +
-  theme_bw() + theme(legend.position = c(0.9,0.1))
+  theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
+
+plots[[4]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=Height, group=Room, colour=as.factor(Room))) + geom_boxplot(aes(fill=datatype)) +
+  geom_jitter(size=0.25) + labs(colour="Treatments") +
+  facet_wrap( ~ Date, scales="free_x") +
+  scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
+  xlab("Treatment room") + ylab("Height") + ggtitle("Height over time with treatments") +
+  guides(fill=guide_legend(title="Data type")) +
+  theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
+# plots[[3]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=D)) + geom_boxplot(aes(fill=datatype)) +
+#   geom_jitter(size=0.5) +
+#   facet_wrap( ~ Date, scales="free_x") +
+#   xlab("Date") + ylab("Diameter") + ggtitle("Diameter over time") +
+#   guides(fill=guide_legend(title="Data type")) +
+#   theme_bw() + theme(legend.position = c(0.9,0.1))
+# plots[[4]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=Height)) + geom_boxplot(aes(fill=datatype)) +
+#   geom_jitter(size=0.5) +
+#   facet_wrap( ~ Date, scales="free_x") +
+#   xlab("Date") + ylab("Height") + ggtitle("Height over time") +
+#   guides(fill=guide_legend(title="Data type")) +
+#   theme_bw() + theme(legend.position = c(0.9,0.1))
 
 pdf(file = "Output/4.data_sampling.pdf")
 plots
 dev.off() 
+
+#-----------------------------------------------------------------------------------------
+# Plot all H vs D data (harvested and measured) over time 
+plots = list() 
+plots[[1]] = ggplot(data = avg.harvest.data.sampling, aes(x=D, y=Height, group=Room, colour=as.factor(Room))) + 
+  geom_point(size=0.5) + stat_smooth(method=lm) +
+  labs(colour="Rooms") + xlab("Diameter (mm)") + ylab("Height (cm)") + 
+  ggtitle("Height vs Diameter with treatments") +
+  theme_bw() + theme(legend.position = c(0.85,0.25))
+
+plots[[2]] = ggplot(data = avg.harvest.data.sampling, aes(x=D, y=Height, group=Room, colour=as.factor(Room))) + 
+  stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE) +
+  geom_smooth(method="lm",se=FALSE) + geom_point(size=0.5) + 
+  facet_wrap(~Room, scales="free_x") +
+  labs(colour="Rooms") + xlab("Diameter (mm)") + ylab("Height (cm)") + 
+  theme_bw() + theme(legend.key.width=unit(0.9,"line")) +
+  theme(legend.position = c(0.17,0.9),legend.direction = "horizontal",legend.box = "vertical")
+
+pdf(file = "Output/7.height_vs_dia_treatments.pdf")
+plots
+dev.off() 
+#-----------------------------------------------------------------------------------------
+
+
 
 #-----------------------------------------------------------------------------------------
 # Plot all data (harvested and predicted) in log scale over time 

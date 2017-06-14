@@ -1,0 +1,50 @@
+Stemmass models:
+Combined linear regression model:
+log(Stemmass) =  -7.705504 + 1.671639 * log(Diameter) + 1.55927 * log(Height)
+
+Individual linear regression models:
+log(Stemmass) =  -8.056822 + 1.625414 * log(Diameter) + 1.731578 * log(Height)
+log(Stemmass) =  -7.901532 + 1.577364 * log(Diameter) + 1.633099 * log(Height)
+log(Stemmass) =  -7.415082 + 1.991048 * log(Diameter) + 1.339634 * log(Height)
+log(Stemmass) =  -7.945633 + 2.134594 * log(Diameter) + 1.38982 * log(Height)
+log(Stemmass) =  -8.140825 + 1.986812 * log(Diameter) + 1.553983 * log(Height)
+log(Stemmass) =  -8.32455 + 2.262204 * log(Diameter) + 1.588513 * log(Height)
+
+
+Rootmass models:
+Combined linear regression model:
+log(Rootmass) =  -3.088205 + 2.012841 * log(Diameter) + 0.05730788 * log(Height)
+
+Individual linear regression models:
+log(Stemmass) =  -3.558372 + 1.272291 * log(Diameter) + 0.5057835 * log(Height)
+log(Stemmass) =  -3.931875 + 1.373557 * log(Diameter) + 0.5331792 * log(Height)
+log(Stemmass) =  -4.201466 + 1.204989 * log(Diameter) + 0.6663013 * log(Height)
+log(Stemmass) =  -4.510758 + 1.656812 * log(Diameter) + 0.5254173 * log(Height)
+log(Stemmass) =  -6.331518 + 1.398008 * log(Diameter) + 1.035141 * log(Height)
+log(Stemmass) =  -7.493052 + 0.688722 * log(Diameter) + 1.508475 * log(Height)
+
+
+Leafmass models:
+Combined linear regression model:
+log(Leafmass) =  -4.439066 + 1.819081 * log(Diameter) + 0.7236328 * log(Height)
+
+Individual linear regression models:
+log(Stemmass) =  -5.696839 + 0.5711722 * log(Diameter) + 1.554743 * log(Height)
+log(Stemmass) =  -3.73654 + 1.587463 * log(Diameter) + 0.6197549 * log(Height)
+log(Stemmass) =  -3.155712 + 1.672718 * log(Diameter) + 0.469942 * log(Height)
+log(Stemmass) =  -4.552893 + 1.226097 * log(Diameter) + 0.968829 * log(Height)
+log(Stemmass) =  -4.283562 + 1.367188 * log(Diameter) + 0.8435503 * log(Height)
+log(Stemmass) =  -4.842352 + 1.600092 * log(Diameter) + 0.8994491 * log(Height)
+
+
+Leafarea models:
+Combined linear regression model:
+log(Leafarea) =  1.307218 + 1.536324 * log(Diameter) + 0.7527705 * log(Height)
+
+Individual linear regression models:
+log(Stemmass) =  -0.3854356 + 1.116982 * log(Diameter) + 1.409323 * log(Height)
+log(Stemmass) =  1.225156 + 1.452754 * log(Diameter) + 0.8263665 * log(Height)
+log(Stemmass) =  2.228769 + 1.412524 * log(Diameter) + 0.579906 * log(Height)
+log(Stemmass) =  1.11733 + 1.14052 * log(Diameter) + 0.9485544 * log(Height)
+log(Stemmass) =  -0.3311742 + 0.9868362 * log(Diameter) + 1.325821 * log(Height)
+log(Stemmass) =  0.02393879 + 1.112786 * log(Diameter) + 1.180712 * log(Height)

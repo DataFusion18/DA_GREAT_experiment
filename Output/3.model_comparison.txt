@@ -1,0 +1,218 @@
+Stemmass models:
+----------------
+### Linear regression ignoring temperature variation:
+Call:
+lm(formula = log(Stemmass) ~ log(D) + log(Height), data = harvest.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.12672 -0.17311  0.00505  0.17852  1.37460 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -7.6585     0.3343  -22.91   <2e-16 ***
+log(D)        1.7185     0.1512   11.36   <2e-16 ***
+log(Height)   1.5309     0.1268   12.07   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3396 on 122 degrees of freedom
+Multiple R-squared:  0.9417,	Adjusted R-squared:  0.9408 
+F-statistic:   986 on 2 and 122 DF,  p-value: < 2.2e-16
+
+
+### Linear regression considering interaction with temperature:
+Call:
+lm(formula = log(Stemmass) ~ log(D) + log(Height) + log(D):temp + 
+    log(Height):temp, data = harvest.data)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.1568 -0.1774 -0.0139  0.1905  1.4230 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      -7.252159   0.499297 -14.525  < 2e-16 ***
+log(D)            1.469182   0.575736   2.552    0.012 *  
+log(Height)       1.443246   0.302390   4.773 5.17e-06 ***
+log(D):temp       0.015191   0.020103   0.756    0.451    
+log(Height):temp -0.002684   0.007047  -0.381    0.704    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3397 on 120 degrees of freedom
+Multiple R-squared:  0.9427,	Adjusted R-squared:  0.9408 
+F-statistic: 493.3 on 4 and 120 DF,  p-value: < 2.2e-16
+
+### Comparison between both models:
+    df      AIC
+sm1  4 89.68556
+sm2  6 91.67202
+    df      BIC
+sm1  4 100.9988
+sm2  6 108.6419
+
+
+Rootmass models:
+----------------
+### Linear regression ignoring temperature variation:
+Call:
+lm(formula = log(Rootmass) ~ log(D) + log(Height), data = harvest.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.65795 -0.17920  0.04711  0.19630  1.15308 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -2.7023     0.3230  -8.366 1.15e-13 ***
+log(D)        2.0037     0.1461  13.710  < 2e-16 ***
+log(Height)  -0.0352     0.1225  -0.287    0.774    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3282 on 122 degrees of freedom
+Multiple R-squared:  0.8515,	Adjusted R-squared:  0.849 
+F-statistic: 349.7 on 2 and 122 DF,  p-value: < 2.2e-16
+
+
+### Linear regression considering interaction with temperature:
+Call:
+lm(formula = log(Rootmass) ~ log(D) + log(Height) + log(D):temp + 
+    log(Height):temp, data = harvest.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.25476 -0.13560  0.02215  0.14813  1.20711 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      -4.758946   0.407691 -11.673  < 2e-16 ***
+log(D)            0.048115   0.470106   0.102  0.91865    
+log(Height)       1.458386   0.246910   5.907 3.34e-08 ***
+log(D):temp       0.046090   0.016415   2.808  0.00582 ** 
+log(Height):temp -0.026438   0.005754  -4.595 1.08e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2773 on 120 degrees of freedom
+Multiple R-squared:  0.8957,	Adjusted R-squared:  0.8922 
+F-statistic: 257.5 on 4 and 120 DF,  p-value: < 2.2e-16
+
+### Comparison between both models:
+    df      AIC
+rm1  4 81.13622
+rm2  6 40.99903
+    df      BIC
+rm1  4 92.44948
+rm2  6 57.96892
+
+
+Leafmass models:
+----------------
+### Linear regression ignoring temperature variation:
+Call:
+lm(formula = log(Leafmass) ~ log(D) + log(Height), data = harvest.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.68613 -0.14441  0.00437  0.14849  0.61695 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -4.01604    0.22516 -17.836  < 2e-16 ***
+log(D)       1.43688    0.10187  14.105  < 2e-16 ***
+log(Height)  0.75760    0.08541   8.871 7.41e-15 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2287 on 122 degrees of freedom
+Multiple R-squared:  0.9397,	Adjusted R-squared:  0.9387 
+F-statistic: 951.1 on 2 and 122 DF,  p-value: < 2.2e-16
+
+
+### Linear regression considering interaction with temperature:
+Call:
+lm(formula = log(Leafmass) ~ log(D) + log(Height) + log(D):temp + 
+    log(Height):temp, data = harvest.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.64111 -0.13069 -0.00437  0.15063  0.59591 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      -4.432241   0.328391 -13.497  < 2e-16 ***
+log(D)            0.457658   0.378666   1.209  0.22919    
+log(Height)       1.250288   0.198884   6.287 5.45e-09 ***
+log(D):temp       0.031629   0.013222   2.392  0.01830 *  
+log(Height):temp -0.012608   0.004635  -2.720  0.00749 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2234 on 120 degrees of freedom
+Multiple R-squared:  0.9435,	Adjusted R-squared:  0.9416 
+F-statistic: 500.6 on 4 and 120 DF,  p-value: < 2.2e-16
+
+### Comparison between both models:
+    df        AIC
+lm1  4  -9.085503
+lm2  6 -13.076917
+    df      BIC
+lm1  4 2.227752
+lm2  6 3.892965
+
+
+Leafarea models:
+----------------
+### Linear regression ignoring temperature variation:
+Call:
+lm(formula = log(Leafarea) ~ log(D) + log(Height), data = harvest.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.55107 -0.12348  0.00359  0.13973  0.58940 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.44821    0.21283   6.805 4.03e-10 ***
+log(D)       1.49696    0.09629  15.547  < 2e-16 ***
+log(Height)  0.73206    0.08073   9.068 2.51e-15 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2162 on 122 degrees of freedom
+Multiple R-squared:  0.9471,	Adjusted R-squared:  0.9463 
+F-statistic:  1093 on 2 and 122 DF,  p-value: < 2.2e-16
+
+
+### Linear regression considering interaction with temperature:
+Call:
+lm(formula = log(Leafarea) ~ log(D) + log(Height) + log(D):temp + 
+    log(Height):temp, data = harvest.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.47321 -0.13998 -0.01808  0.15086  0.49570 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)       0.617060   0.302930   2.037 0.043853 *  
+log(D)            1.339351   0.349307   3.834 0.000202 ***
+log(Height)       1.129186   0.183464   6.155 1.03e-08 ***
+log(D):temp      -0.005556   0.012197  -0.456 0.649572    
+log(Height):temp -0.002814   0.004275  -0.658 0.511681    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2061 on 120 degrees of freedom
+Multiple R-squared:  0.9528,	Adjusted R-squared:  0.9512 
+F-statistic: 605.3 on 4 and 120 DF,  p-value: < 2.2e-16
+
+### Comparison between both models:
+    df      AIC
+la1  4 -23.1707
+la2  6 -33.2526
+    df       BIC
+la1  4 -11.85745
+la2  6 -16.28271

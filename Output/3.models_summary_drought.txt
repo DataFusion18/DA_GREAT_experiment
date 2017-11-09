@@ -17,7 +17,8 @@ Treatment # w :log(Stemmass) =  -10.47096 + 1.660547 * log(Diameter) + 2.244235 
 Room # 6 :
 Treatment # d :log(Stemmass) =  -7.806492 + 4.556633 * log(Diameter) + 0.9987389 * log(Height)
 Treatment # w :log(Stemmass) =  -8.242717 + 2.28375 * log(Diameter) + 1.600156 * log(Height)
-
+Room # 7 :
+Treatment # d :
 
 Rootmass models: Individual linear regression:
 Room # 1 :
@@ -38,7 +39,8 @@ Treatment # w :log(Rootmass) =  -5.049415 + 2.181184 * log(Diameter) + 0.4455538
 Room # 6 :
 Treatment # d :log(Rootmass) =  -4.967084 + 1.450062 * log(Diameter) + 0.6701668 * log(Height)
 Treatment # w :log(Rootmass) =  -8.582231 + 0.009603754 * log(Diameter) + 1.925504 * log(Height)
-
+Room # 7 :
+Treatment # d :
 
 Leafmass models: Individual linear regression:
 Room # 1 :
@@ -59,7 +61,8 @@ Treatment # w :log(Leafmass) =  -5.332267 + 1.777518 * log(Diameter) + 0.9868633
 Room # 6 :
 Treatment # d :log(Leafmass) =  -4.063273 + 2.603229 * log(Diameter) + 0.4766957 * log(Height)
 Treatment # w :log(Leafmass) =  -5.924587 + 1.101113 * log(Diameter) + 1.33575 * log(Height)
-
+Room # 7 :
+Treatment # d :
 
 Leafarea models: Individual linear regression:
 Room # 1 :
@@ -80,3 +83,5 @@ Treatment # w :log(Leafarea) =  -0.1267247 + 1.352932 * log(Diameter) + 1.17166 
 Room # 6 :
 Treatment # d :log(Leafarea) =  3.164989 + 3.263367 * log(Diameter) + -0.1840584 * log(Height)
 Treatment # w :log(Leafarea) =  -0.5844519 + 0.7304211 * log(Diameter) + 1.464739 * log(Height)
+Room # 7 :
+Treatment # d :

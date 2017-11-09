@@ -16,9 +16,10 @@ library("gridExtra")
 library("plyr")
 library("car")
 library("lattice")
-# library("multiplot")
+library("visreg")
 
 
 #- load the custom functions that do most of the heavy lifting
 source("R/stat_smooth_func.R")
+
 

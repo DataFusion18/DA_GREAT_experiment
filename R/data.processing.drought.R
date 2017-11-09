@@ -1,10 +1,10 @@
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
-#-- Script to analysis the raw GREAT experiment draught data
+#-- Script to analysis the raw GREAT experiment drought data
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
 
-###### R script to import and process the raw GREAT experiment draught data 
+###### R script to import and process the raw GREAT experiment drought data 
 # to model the carbon pools and fluxes using DA
 
 #-----------------------------------------------------------------------------------------
@@ -77,11 +77,11 @@ harvest.data = harvest.data[with(harvest.data, order(Rootmass)), ]
 # Units are: masses = g; height = cm; dia = mm, leafarea = cm^2
 height.dia = height.dia[with(height.dia, order(Room,W_treatment)), ]
 fit.sm = list()
-draught = as.factor(c("d","w"))
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+drought = as.factor(c("d","w"))
+for (i in 1:(length(unique(harvest.data$Room)))) {
   for (j in 1:2) {
-    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% draught[j])
-    height.dia.ind = subset(height.dia, Room %in% i & W_treatment %in% draught[j])
+    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% drought[j])
+    height.dia.ind = subset(height.dia, Room %in% i & W_treatment %in% drought[j])
     fit.sm[[(i-1)*2+j]] <- lm(log(Stemmass) ~ log(D) + log(Height), data=harvest.data.ind)
     # summary(fit.sm[[i]])
     # Estimate the stemmass from the fitted linear regression equation
@@ -96,15 +96,15 @@ for (i in 1:(length(unique(harvest.data$Room))-1)) {
     # }
   }
   # if (j == 1) {
-  #   model.rmse$rmse.draught[1] = sqrt( ( rmse.sm ) / nrow(harvest.data))
-  # model.error$error.draught[1] = model.rmse$rmse.individual[1] / mean(harvest.data$Stemmass) * 100 #Percentage Error
+  #   model.rmse$rmse.drought[1] = sqrt( ( rmse.sm ) / nrow(harvest.data))
+  # model.error$error.drought[1] = model.rmse$rmse.individual[1] / mean(harvest.data$Stemmass) * 100 #Percentage Error
   # } else {
-  #   model.rmse$rmse.draught[1] = sqrt( ( rmse.sm ) / nrow(harvest.data))
-  #   model.error$error.draught[1] = model.rmse$rmse.individual[1] / mean(harvest.data$Stemmass) * 100 #Percentage Error
+  #   model.rmse$rmse.drought[1] = sqrt( ( rmse.sm ) / nrow(harvest.data))
+  #   model.error$error.drought[1] = model.rmse$rmse.individual[1] / mean(harvest.data$Stemmass) * 100 #Percentage Error
   # }
 }
-# model.rmse$rmse.draught[1] = sqrt( ( rmse.sm ) / nrow(harvest.data))
-# model.error$error.draught[1] = model.rmse$rmse.individual[1] / mean(harvest.data$Stemmass) * 100 #Percentage Error
+# model.rmse$rmse.drought[1] = sqrt( ( rmse.sm ) / nrow(harvest.data))
+# model.error$error.drought[1] = model.rmse$rmse.individual[1] / mean(harvest.data$Stemmass) * 100 #Percentage Error
 
 #-----------------------------------------------------------------------------------------
 
@@ -112,10 +112,10 @@ for (i in 1:(length(unique(harvest.data$Room))-1)) {
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
 # Units are: masses = g; height = cm; dia = mm
 fit.rm = list()
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+for (i in 1:(length(unique(harvest.data$Room)))) {
   for (j in 1:2) {
-    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% draught[j])
-    height.dia.ind = subset(height.dia, Room %in% i & W_treatment %in% draught[j])
+    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% drought[j])
+    height.dia.ind = subset(height.dia, Room %in% i & W_treatment %in% drought[j])
     fit.rm[[(i-1)*2+j]] <- lm(log(Rootmass) ~ log(D) + log(Height), data=harvest.data.ind)
     # summary(fit.sm[[i]])
     # Estimate the stemmass from the fitted linear regression equation
@@ -131,10 +131,10 @@ for (i in 1:(length(unique(harvest.data$Room))-1)) {
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
 # Units are: masses = g; height = cm; dia = mm
 fit.lm = list()
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+for (i in 1:(length(unique(harvest.data$Room)))) {
   for (j in 1:2) {
-    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% draught[j])
-    height.dia.ind = subset(height.dia, Room %in% i & W_treatment %in% draught[j])
+    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% drought[j])
+    height.dia.ind = subset(height.dia, Room %in% i & W_treatment %in% drought[j])
     fit.lm[[(i-1)*2+j]] <- lm(log(Leafmass) ~ log(D) + log(Height), data=harvest.data.ind)
     # summary(fit.sm[[i]])
     # Estimate the stemmass from the fitted linear regression equation
@@ -150,10 +150,10 @@ for (i in 1:(length(unique(harvest.data$Room))-1)) {
 # Fit the model with initial data (30) and intermediate (18*2=36) and final (90) harvest data for all seedlings (156 data in total)
 # Units are: masses = g; height = cm; dia = mm; leaf area = cm2
 fit.la = list()
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+for (i in 1:(length(unique(harvest.data$Room)))) {
   for (j in 1:2) {
-    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% draught[j])
-    height.dia.ind = subset(height.dia, Room %in% i & W_treatment %in% draught[j])
+    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% drought[j])
+    height.dia.ind = subset(height.dia, Room %in% i & W_treatment %in% drought[j])
     fit.la[[(i-1)*2+j]] <- lm(log(Leafarea) ~ log(D) + log(Height), data=harvest.data.ind)
     # summary(fit.sm[[i]])
     # Estimate the stemmass from the fitted linear regression equation
@@ -178,7 +178,7 @@ plots[[1]] = ggplot() +
   ylab("Stemmass (g DM)") + xlab("Height (cm)") +
   coord_trans(y = "log10") + 
   scale_colour_discrete(name="Treatments", breaks=c("d","w","i"),
-                        labels=c("Draught", "Watered", "Initial")) +
+                        labels=c("drought", "Watered", "Initial")) +
   scale_shape_discrete(name="Data Type", breaks=c("4","1"),
                        labels=c("Harvest", "Predicted")) +
   theme_bw() + theme(legend.position = c(0.8,0.3), legend.key = element_blank()) +
@@ -190,7 +190,7 @@ plots[[2]] = ggplot() +
   ylab("Stemmass (g DM)") + xlab("Diameter (mm)") +
   coord_trans(y = "log10") + 
   scale_colour_discrete(name="Treatments", breaks=c("d","w","i"),
-                        labels=c("Draught", "Watered", "Initial")) +
+                        labels=c("drought", "Watered", "Initial")) +
   scale_shape_discrete(name="Data Type", breaks=c("4","1"),
                        labels=c("Harvest", "Predicted")) +
   theme_bw() + theme(legend.position = c(0.8,0.3), legend.key = element_blank()) +
@@ -203,7 +203,7 @@ plots[[3]] = ggplot() +
   ylab("Rootmass (g DM)") + xlab("Height (cm)") +
   coord_trans(y = "log10") + 
   scale_colour_discrete(name="Treatments", breaks=c("d","w","i"),
-                        labels=c("Draught", "Watered", "Initial")) +
+                        labels=c("drought", "Watered", "Initial")) +
   scale_shape_discrete(name="Data Type", breaks=c("4","1"),
                        labels=c("Harvest", "Predicted")) +
   theme_bw() + theme(legend.position = c(0.8,0.3), legend.key = element_blank()) +
@@ -215,7 +215,7 @@ plots[[4]] = ggplot() +
   ylab("Rootmass (g DM)") + xlab("Diameter (mm)") +
   coord_trans(y = "log10") + 
   scale_colour_discrete(name="Treatments", breaks=c("d","w","i"),
-                        labels=c("Draught", "Watered", "Initial")) +
+                        labels=c("drought", "Watered", "Initial")) +
   scale_shape_discrete(name="Data Type", breaks=c("4","1"),
                        labels=c("Harvest", "Predicted")) +
   theme_bw() + theme(legend.position = c(0.8,0.3), legend.key = element_blank()) +
@@ -229,7 +229,7 @@ plots[[5]] = ggplot() +
   ylab("Leafmass (g DM)") + xlab("Height (cm)") +
   coord_trans(y = "log10") + 
   scale_colour_discrete(name="Treatments", breaks=c("d","w","i"),
-                        labels=c("Draught", "Watered", "Initial")) +
+                        labels=c("drought", "Watered", "Initial")) +
   scale_shape_discrete(name="Data Type", breaks=c("4","1"),
                        labels=c("Harvest", "Predicted")) +
   theme_bw() + theme(legend.position = c(0.8,0.3), legend.key = element_blank()) +
@@ -241,7 +241,7 @@ plots[[6]] = ggplot() +
   ylab("Leafmass (g DM)") + xlab("Diameter (mm)") +
   coord_trans(y = "log10") + 
   scale_colour_discrete(name="Treatments", breaks=c("d","w","i"),
-                        labels=c("Draught", "Watered", "Initial")) +
+                        labels=c("drought", "Watered", "Initial")) +
   scale_shape_discrete(name="Data Type", breaks=c("4","1"),
                        labels=c("Harvest", "Predicted")) +
   theme_bw() + theme(legend.position = c(0.8,0.3), legend.key = element_blank()) +
@@ -255,7 +255,7 @@ plots[[7]] = ggplot() +
   ylab(expression(Leafarea~"("*cm^"2"*")")) + xlab("Height (cm)") +
   coord_trans(y = "log10") + 
   scale_colour_discrete(name="Treatments", breaks=c("d","w","i"),
-                        labels=c("Draught", "Watered", "Initial")) +
+                        labels=c("drought", "Watered", "Initial")) +
   scale_shape_discrete(name="Data Type", breaks=c("4","1"),
                        labels=c("Harvest", "Predicted")) +
   theme_bw() + theme(legend.position = c(0.8,0.3), legend.key = element_blank()) +
@@ -267,14 +267,14 @@ plots[[8]] = ggplot() +
   ylab(expression(Leafarea~"("*cm^"2"*")")) + xlab("Diameter (mm)") +
   coord_trans(y = "log10") + 
   scale_colour_discrete(name="Treatments", breaks=c("d","w","i"),
-                        labels=c("Draught", "Watered", "Initial")) +
+                        labels=c("drought", "Watered", "Initial")) +
   scale_shape_discrete(name="Data Type", breaks=c("4","1"),
                        labels=c("Harvest", "Predicted")) +
   theme_bw() + theme(legend.position = c(0.8,0.3), legend.key = element_blank()) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
 
 ml = marrangeGrob(plots, nrow=1, ncol=2)
-ggsave("Output/1.tree_attributes_over_time_draught.pdf", ml)
+ggsave("Output/1.tree_attributes_over_time_drought.pdf", ml)
 #-----------------------------------------------------------------------------------------
 
 
@@ -282,9 +282,9 @@ ggsave("Output/1.tree_attributes_over_time_draught.pdf", ml)
 # Plot measuremnts vs fitted points to judge the model fits
 plots = list()
 palette = c("#FF0000FF", "yellow3", "#00FF00FF", "#00FFFFFF", "#0000FFFF", "#FF00FFFF")
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+for (i in 1:(length(unique(harvest.data$Room)))) {
   for (j in 1:2) {
-    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% draught[j])
+    harvest.data.ind = subset(harvest.data, Room %in% i & W_treatment %in% drought[j])
     
     par(mfrow=c(2,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0), oma=c(0,0,1,0))
     plot(exp(fitted(fit.sm[[(i-1)*2+j]])), harvest.data.ind$Stemmass, col=palette[i], pch=16, xlab="Fitted stem mass (g)", ylab="Measured stem mass (g)")
@@ -330,12 +330,12 @@ for (i in 1:(length(unique(harvest.data$Room))-1)) {
     legend('bottomright',legend=sort(unique(harvest.data.ind$Room)),title="Room",lty=NULL,col=palette[i],pch=19,
            bty="n",ncol=1,cex=0.8,pt.cex=1.2)
     if (j == 1) {
-      mtext(paste("Model fits for room #",i,"and draught treatment"), side = 3, line = -0.5, outer = TRUE)
+      mtext(paste("Model fits for room #",i,"and drought treatment"), side = 3, line = -0.5, outer = TRUE)
     } else {
-    mtext(paste("Model fits for room #",i,"and watered treatment"), side = 3, line = -0.5, outer = TRUE)
+      mtext(paste("Model fits for room #",i,"and watered treatment"), side = 3, line = -0.5, outer = TRUE)
     }
     plots[[(i-1)*2+j]] = recordPlot()
-
+    
     # # plot residuals against fitted values and quantile-quantile plot
     # # png(file = "Output/model_residuals.png", units="px", width=1500, height=2000, res=300)
     # par(mfrow=c(4,2), mar=c(3, 4, 1, 1), mgp=c(2,1,0))
@@ -366,7 +366,7 @@ for (i in 1:(length(unique(harvest.data$Room))-1)) {
     # plots[[i*2]] = recordPlot()
   }
 }
-pdf(file = "Output/3.model_attributes_rooms_draught.pdf")
+pdf(file = "Output/3.model_attributes_rooms_drought.pdf")
 plots
 dev.off()
 #-----------------------------------------------------------------------------------------
@@ -374,26 +374,26 @@ dev.off()
 
 #-----------------------------------------------------------------------------------------
 # Print and save the model comparison summary
-sink("Output/3.models_summary_draught.txt")
+sink("Output/3.models_summary_drought.txt")
 cat("Stemmass models: Individual linear regression:")
 cat("\n")
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+for (i in 1:(length(unique(harvest.data$Room)))) {
   cat("Room #",i,":"); cat("\n")
   for (j in 1:2) {
-    cat("Treatment #",as.character(draught[j]),":")
+    cat("Treatment #",as.character(drought[j]),":")
     cat("log(Stemmass) = ", coefficients(fit.sm[[(i-1)*2+j]])[1], "+", 
-      coefficients(fit.sm[[(i-1)*2+j]])[2],"* log(Diameter) +", coefficients(fit.sm[[(i-1)*2+j]])[3], "* log(Height)")
-  cat("\n")
+        coefficients(fit.sm[[(i-1)*2+j]])[2],"* log(Diameter) +", coefficients(fit.sm[[(i-1)*2+j]])[3], "* log(Height)")
+    cat("\n")
   }
 }
 
 cat("\n");cat("\n")
 cat("Rootmass models: Individual linear regression:")
 cat("\n")
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+for (i in 1:(length(unique(harvest.data$Room)))) {
   cat("Room #",i,":"); cat("\n")
   for (j in 1:2) {
-    cat("Treatment #",as.character(draught[j]),":")
+    cat("Treatment #",as.character(drought[j]),":")
     cat("log(Rootmass) = ", coefficients(fit.rm[[(i-1)*2+j]])[1], "+", 
         coefficients(fit.rm[[(i-1)*2+j]])[2],"* log(Diameter) +", coefficients(fit.rm[[(i-1)*2+j]])[3], "* log(Height)")
     cat("\n")
@@ -403,10 +403,10 @@ for (i in 1:(length(unique(harvest.data$Room))-1)) {
 cat("\n");cat("\n")
 cat("Leafmass models: Individual linear regression:")
 cat("\n")
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+for (i in 1:(length(unique(harvest.data$Room)))) {
   cat("Room #",i,":"); cat("\n")
   for (j in 1:2) {
-    cat("Treatment #",as.character(draught[j]),":")
+    cat("Treatment #",as.character(drought[j]),":")
     cat("log(Leafmass) = ", coefficients(fit.lm[[(i-1)*2+j]])[1], "+", 
         coefficients(fit.lm[[(i-1)*2+j]])[2],"* log(Diameter) +", coefficients(fit.lm[[(i-1)*2+j]])[3], "* log(Height)")
     cat("\n")
@@ -416,10 +416,10 @@ for (i in 1:(length(unique(harvest.data$Room))-1)) {
 cat("\n");cat("\n")
 cat("Leafarea models: Individual linear regression:")
 cat("\n")
-for (i in 1:(length(unique(harvest.data$Room))-1)) {
+for (i in 1:(length(unique(harvest.data$Room)))) {
   cat("Room #",i,":"); cat("\n")
   for (j in 1:2) {
-    cat("Treatment #",as.character(draught[j]),":")
+    cat("Treatment #",as.character(drought[j]),":")
     cat("log(Leafarea) = ", coefficients(fit.la[[(i-1)*2+j]])[1], "+", 
         coefficients(fit.la[[(i-1)*2+j]])[2],"* log(Diameter) +", coefficients(fit.la[[(i-1)*2+j]])[3], "* log(Height)")
     cat("\n")
@@ -431,7 +431,7 @@ sink()
 #-----------------------------------------------------------------------------------------
 # Save the stem mass data for MCMC CBM
 height.dia$Comment = NULL
-write.csv(height.dia, file = "Output/Cleaf_Cstem_Croot_draught.csv", row.names = FALSE)
+write.csv(height.dia, file = "Output/Cleaf_Cstem_Croot_drought.csv", row.names = FALSE)
 
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
@@ -466,19 +466,19 @@ avg.harvest.data[(length(rooms)+nrow(int.harvest.1)+1) : (length(rooms)+nrow(int
 final.harvest = final.harvest[with(final.harvest, order(Room,Date)), ]
 for(i in 1:length(rooms)) {
   for(j in 1:2) {
-  # final.harvest.idn = subset(final.harvest,Room==rooms[i]) 
-  final.harvest.idn = subset(final.harvest, Room %in% rooms[i] & W_treatment %in% draught[j])
-  for(k in 1:2) {
-    if (k==1) {
-      final.harvest.idn.date = subset(final.harvest.idn, Date %in% as.Date(c("2016-02-17", "2016-02-18", "2016-02-19")))
-    } else {
-      final.harvest.idn.date = subset(final.harvest.idn, Date %in% as.Date(c("2016-02-22", "2016-02-23", "2016-02-24")))
-    }
+    # final.harvest.idn = subset(final.harvest,Room==rooms[i]) 
+    final.harvest.idn = subset(final.harvest, Room %in% rooms[i] & W_treatment %in% drought[j])
+    for(k in 1:2) {
+      if (k==1) {
+        final.harvest.idn.date = subset(final.harvest.idn, Date %in% as.Date(c("2016-02-17", "2016-02-18", "2016-02-19")))
+      } else {
+        final.harvest.idn.date = subset(final.harvest.idn, Date %in% as.Date(c("2016-02-22", "2016-02-23", "2016-02-24")))
+      }
       avg.harvest.data[nrow(avg.harvest.data)+1, c("Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
       avg.harvest.data[nrow(avg.harvest.data), c("Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE")] = (apply(final.harvest.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], 2, sd, na.rm = TRUE))/(nrow(final.harvest.idn.date))^0.5 # R9 = Standard error of leaf counts
       avg.harvest.data$Date[nrow(avg.harvest.data)] = mean(final.harvest.idn.date$Date)
       avg.harvest.data$Room[nrow(avg.harvest.data)] = rooms[i]
-      avg.harvest.data$W_treatment[nrow(avg.harvest.data)] = as.character(draught[j])
+      avg.harvest.data$W_treatment[nrow(avg.harvest.data)] = as.character(drought[j])
     }
   }
 }
@@ -489,24 +489,28 @@ melted.harvest.data$W_treatment = as.factor(melted.harvest.data$W_treatment)
 
 #-----------------------------------------------------------------------------------------
 # Data predicted for all 15 replicates from regression analyses done with all available harvest data
-keeps = c("Date","Room","Leafarea","Leafmass","Stemmass","Rootmass")
+keeps = c("Date","Room","W_treatment","Leafarea","Leafmass","Stemmass","Rootmass")
 height.dia.crop = height.dia[ , keeps, drop = FALSE]
-pred.data = data.frame(matrix(vector(), 0, 10,
-                              dimnames=list(c(), c("Date", "Room", "Leafarea", "Leafarea_SE", "Leafmass", "Leafmass_SE", "Stemmass", "Stemmass_SE", "Rootmass", "Rootmass_SE"))),
+pred.data = data.frame(matrix(vector(), 0, 11,
+                              dimnames=list(c(), c("Date", "Room", "W_treatment", "Leafarea", "Leafarea_SE", "Leafmass", "Leafmass_SE", "Stemmass", "Stemmass_SE", "Rootmass", "Rootmass_SE"))),
                        stringsAsFactors=F)
 pred.data$Date = as.Date(pred.data$Date)
 for(i in 1:length(rooms)) {
-  height.dia.crop.idn = subset(height.dia.crop,Room==rooms[i]) 
-  for(j in 1:length(unique(height.dia.crop.idn$Date))) {
-    height.dia.crop.idn.date = subset(height.dia.crop.idn, Date == unique(height.dia.crop.idn$Date)[j])
-    pred.data[nrow(pred.data)+1, c("Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(height.dia.crop.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
-    pred.data[nrow(pred.data), c("Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE")] = (apply(height.dia.crop.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], 2, sd, na.rm = TRUE))/(nrow(height.dia.crop.idn.date))^0.5 # R9 = Standard error of leaf counts
-    pred.data$Date[nrow(pred.data)] = height.dia.crop.idn.date$Date[1]
-    pred.data$Room[nrow(pred.data)] = rooms[i]
+  for(j in 1:2) {
+    height.dia.crop.idn = subset(height.dia.crop, Room %in% rooms[i] & W_treatment %in% drought[j])
+    for(k in 1:length(unique(height.dia.crop.idn$Date))) {
+      height.dia.crop.idn.date = subset(height.dia.crop.idn, Date == unique(height.dia.crop.idn$Date)[k])
+      pred.data[nrow(pred.data)+1, c("Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(height.dia.crop.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
+      pred.data[nrow(pred.data), c("Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE")] = (apply(height.dia.crop.idn.date[c("Leafarea", "Leafmass", "Stemmass", "Rootmass")], 2, sd, na.rm = TRUE))/(nrow(height.dia.crop.idn.date))^0.5 # R9 = Standard error of leaf counts
+      pred.data$Date[nrow(pred.data)] = height.dia.crop.idn.date$Date[1]
+      pred.data$Room[nrow(pred.data)] = rooms[i]
+      pred.data$W_treatment[nrow(pred.data)] = as.character(drought[j])
+    }
   }
 }
+
 pred.data$Date = as.Date(pred.data$Date)
-melted.pred.data = melt(pred.data, id.vars=c("Date","Room"))
+melted.pred.data = melt(pred.data, id.vars=c("Date","Room","W_treatment"))
 melted.pred.data$Group = as.factor("Predicted")
 melted.data = rbind(melted.harvest.data,melted.pred.data)
 
@@ -520,26 +524,28 @@ for (p in 1:length(meas)) {
   summary.error.Cpool = subset(melted.data,variable %in% error[p])
   summary.error.Cpool$parameter = summary.data.Cpool$value
   
-  plots[[p]] = ggplot(summary.error.Cpool, aes(x=Date, y=parameter, group = interaction(Room,Group), colour=as.factor(Room), shape=as.factor(Group))) + 
+  plots[[p]] = ggplot(summary.error.Cpool, aes(x=Date, y=parameter, group = interaction(W_treatment,Group), colour=as.factor(W_treatment), shape=as.factor(Group))) + 
     geom_point(position=pd,size=2.5) +
     geom_errorbar(position=pd,aes(ymin=parameter-value, ymax=parameter+value), colour="grey", width=2) +
-    geom_line(position=pd,data = summary.error.Cpool, aes(x = Date, y = parameter, group = interaction(Room,Group), colour=as.factor(Room), linetype=as.factor(Group))) +
+    geom_line(position=pd,data = summary.error.Cpool, aes(x = Date, y = parameter, group = interaction(W_treatment,Group), colour=as.factor(W_treatment), linetype=as.factor(Group))) +
     ylab(paste(as.character(meas[p]),"(g DM)")) + 
+    facet_wrap(~ Room , ncol=2) +
+    # facet_grid(Room ~ .) +
     # xlab("Month") +
     # coord_trans(y = "log10") + ylab(paste(as.character(meas[p]),"(g DM)")) +
     # ggtitle("C pools - Measured (points) vs Modelled (lines)") +
-    labs(colour="Temperature Room",shape="Data Type",linetype="Data Type") +
+    labs(colour="drought treatment",shape="Data Type",linetype="Data Type") +
     theme_bw() +
     # annotate("text", x = min(summary.error.Cpool$Date), y = max(summary.error.Cpool$value), size = 14, label = paste(title[p])) +
     # theme(plot.title = element_text(size = 20, face = "bold")) +
     theme(legend.title = element_text(colour="black", size=12)) +
     theme(legend.text = element_text(colour="black", size = 12)) +
-    # theme(legend.key.height=unit(0.9,"line")) +
-    theme(legend.position = c(0.2,0.80)) +
+    # theme(legend.key.width=unit(0.8,"line")) +
+    theme(legend.position = c(0.52,0.95), legend.direction = "horizontal", legend.box = "horizontal") +
     theme(legend.key = element_blank()) +
     theme(text = element_text(size=12)) +
-    theme(axis.title.x = element_blank()) +
-    theme(axis.title.y = element_text(size = 14, vjust=0.3)) +
+    theme(axis.title.x = element_text(size = 12, vjust=0.3)) +
+    theme(axis.title.y = element_text(size = 12, vjust=0.3)) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
   
   if (p==1) {
@@ -548,165 +554,239 @@ for (p in 1:length(meas)) {
   # ggsave(p3,filename=paste("Output/Measured_",meas[p],".png",sep=""))
 }
 
-pdf(file = "Output/2.tree_attributes_measured_vs_predicted.pdf",width=12, height=15)
-print (do.call(grid.arrange,  plots))
+pdf(file = "Output/2.tree_attributes_measured_vs_predicted_drought.pdf")
+# print (do.call(grid.arrange,  plots))
 # grid.arrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]])
-dev.off() 
-#-----------------------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------------------
-#- Plot all vs harvested (height and dia) data to explore the sampling effect on biomass prediction variation
-height.dia$datatype = as.character("all")
-harvest.data$datatype = as.character("harvested")
-# harvest.data = unique(merge(harvest.data, height.dia[,c("Room","Pot")]))
-harvest.data$Leafno = NULL
-# height.dia$Room = NULL
-avg.harvest.data.sampling = rbind(height.dia,harvest.data)
-keeps <- c("Date", "Room", "datatype", "Height", "D", "Leafarea", "Leafmass", "Stemmass", "Rootmass")
-avg.harvest.data.sampling = avg.harvest.data.sampling[ , keeps, drop = FALSE]
-unique(avg.harvest.data.sampling$Date)
-avg.harvest.data.sampling.1 = subset(avg.harvest.data.sampling, Date %in% 
-                                       as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10")))
-avg.harvest.data.sampling.2 = subset(avg.harvest.data.sampling, !(Date %in%
-                                                                    as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10"))))
-plots = list() 
-plots[[1]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=D)) + geom_boxplot(aes(fill=datatype)) +
-  geom_jitter(size=0.25) +
-  facet_wrap( ~ Date, scales="free_x") +
-  scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
-  xlab("Treatment room") + ylab("Diameter") + ggtitle("Diameter over time") +
-  guides(fill=guide_legend(title="Data type")) +
-  theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
-
-plots[[2]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=D, group=Room, colour=as.factor(Room))) + geom_boxplot(aes(fill=datatype)) +
-  geom_jitter(size=0.25) + 
-  labs(colour="Treatments") +
-  facet_wrap( ~ Date, scales="free_x") +
-  scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
-  xlab("Treatment room") + ylab("Diameter") + ggtitle("Diameter over time with treatments") +
-  guides(fill=guide_legend(title="Data type")) +
-  theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
-
-plots[[3]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=Height)) + geom_boxplot(aes(fill=datatype)) +
-  geom_jitter(size=0.25) +
-  facet_wrap( ~ Date, scales="free_x") +
-  scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
-  xlab("Treatment room") + ylab("Height") + ggtitle("Height over time") +
-  guides(fill=guide_legend(title="Data type")) +
-  theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
-
-plots[[4]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=Height, group=Room, colour=as.factor(Room))) + geom_boxplot(aes(fill=datatype)) +
-  geom_jitter(size=0.25) + labs(colour="Treatments") +
-  facet_wrap( ~ Date, scales="free_x") +
-  scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
-  xlab("Treatment room") + ylab("Height") + ggtitle("Height over time with treatments") +
-  guides(fill=guide_legend(title="Data type")) +
-  theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
-# plots[[3]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=D)) + geom_boxplot(aes(fill=datatype)) +
-#   geom_jitter(size=0.5) +
-#   facet_wrap( ~ Date, scales="free_x") +
-#   xlab("Date") + ylab("Diameter") + ggtitle("Diameter over time") +
-#   guides(fill=guide_legend(title="Data type")) +
-#   theme_bw() + theme(legend.position = c(0.9,0.1))
-# plots[[4]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=Height)) + geom_boxplot(aes(fill=datatype)) +
-#   geom_jitter(size=0.5) +
-#   facet_wrap( ~ Date, scales="free_x") +
-#   xlab("Date") + ylab("Height") + ggtitle("Height over time") +
-#   guides(fill=guide_legend(title="Data type")) +
-#   theme_bw() + theme(legend.position = c(0.9,0.1))
-
-pdf(file = "Output/4.data_sampling.pdf")
-plots
-dev.off() 
-
-#-----------------------------------------------------------------------------------------
-# Plot all H vs D data (harvested and measured) over time 
-plots = list() 
-plots[[1]] = ggplot(data = avg.harvest.data.sampling, aes(x=D, y=Height, group=Room, colour=as.factor(Room))) + 
-  geom_point(size=0.5) + stat_smooth(method=lm) +
-  labs(colour="Rooms") + xlab("Diameter (mm)") + ylab("Height (cm)") + 
-  ggtitle("Height vs Diameter with treatments") +
-  theme_bw() + theme(legend.position = c(0.85,0.25))
-
-plots[[2]] = ggplot(data = avg.harvest.data.sampling, aes(x=D, y=Height, group=Room, colour=as.factor(Room))) + 
-  stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE) +
-  geom_smooth(method="lm",se=FALSE) + geom_point(size=0.5) + 
-  facet_wrap(~Room, scales="free_x") +
-  labs(colour="Rooms") + xlab("Diameter (mm)") + ylab("Height (cm)") + 
-  theme_bw() + theme(legend.key.width=unit(0.9,"line")) +
-  theme(legend.position = c(0.17,0.9),legend.direction = "horizontal",legend.box = "vertical")
-
-pdf(file = "Output/7.height_vs_dia_treatments.pdf")
 plots
 dev.off() 
 #-----------------------------------------------------------------------------------------
 
 
-
 #-----------------------------------------------------------------------------------------
-# Plot all data (harvested and predicted) in log scale over time 
-plots = list() 
-font.size = 10
-# ggplot(data=avg.harvest.data.sampling, aes(x=D, y=Stemmass, group = interaction(Room,datatype), colour=as.factor(Room), shape=as.factor(datatype), size=as.factor(datatype))) +
-#   geom_point() +
-#   coord_trans(y = "log10") +
-#   scale_size_manual(values=c(1,2))
-plot.fun1 <- function(df1,df2,font.size){
-  plots = ggplot() +
-    geom_point(data=df1, aes(x=df1[,2], y=df1[,3], group = colnames(df1)[1], colour=as.factor(df1[,1])),size=0.1) +
-    coord_trans(y = "log10") + ylab(paste(as.character(colnames(df1)[3] ), "(log scale)")) + 
-    xlab(paste(as.character(colnames(df1)[2]))) +
-    geom_point(data=df2, aes(x = df2[,2], y = df2[,3], group = colnames(df2)[3], colour=as.factor(df2[,1])),pch=2,size=1) +
-    scale_color_manual(name=paste(as.character(colnames(df1)[1])), values = rainbow(14)) +
-    theme_bw() + scale_size_manual(name="Data type", values=c(1,2)) +
-    annotate("text", x = (min(df1[,2])*4), y = (max(df1[,3])*0.9), size = font.size-8, 
-             label = paste("Dots = Predicted", "\nTriangles = Harvest")) +
-    theme(legend.title = element_text(colour="black", size=font.size-3)) +
-    theme(legend.text = element_text(colour="black", size = font.size-5)) +
-    theme(legend.position = c(0.8,0.3)) + theme(legend.key = element_blank()) +
-    theme(text = element_text(size=font.size)) +
-    theme(axis.title.x = element_text(size = font.size)) + theme(axis.title.y = element_text(size = font.size)) +
-    theme(legend.key.height=unit(0.5,"line")) +
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-  output = plots
+# Plot final (on 29-02-2016) measured H, D and predicted tree attributes with SE (for 15 replicates)
+# to check the optimum temperature for both wet and dry treatments
+keeps = c("Date","Room","W_treatment","Height","D","Leafarea","Leafmass","Stemmass","Rootmass")
+height.dia.crop.1 = height.dia[ , keeps, drop = FALSE]
+pred.data.1 = data.frame(matrix(vector(), 0, 15, dimnames=list(c(), c("Date", "Room", "W_treatment", "Height","Height_SE","D","D_SE",
+                                                                      "Leafarea", "Leafarea_SE", "Leafmass", "Leafmass_SE", "Stemmass", "Stemmass_SE", "Rootmass", "Rootmass_SE"))),
+                         stringsAsFactors=F)
+pred.data.1$Date = as.Date(pred.data.1$Date)
+for(i in 1:length(rooms)) {
+  for(j in 1:2) {
+    height.dia.crop.idn = subset(height.dia.crop.1, Room %in% rooms[i] & W_treatment %in% drought[j])
+    for(k in 1:length(unique(height.dia.crop.idn$Date))) {
+      height.dia.crop.idn.date = subset(height.dia.crop.idn, Date == unique(height.dia.crop.idn$Date)[k])
+      pred.data.1[nrow(pred.data.1)+1, c("Height","D","Leafarea", "Leafmass", "Stemmass", "Rootmass")] = colMeans(height.dia.crop.idn.date[c("Height","D","Leafarea", "Leafmass", "Stemmass", "Rootmass")], na.rm = TRUE) # R8 = Average of leaf counts
+      pred.data.1[nrow(pred.data.1), c("Height_SE","D_SE","Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE")] = (apply(height.dia.crop.idn.date[c("Height","D","Leafarea", "Leafmass", "Stemmass", "Rootmass")], 2, sd, na.rm = TRUE))/(nrow(height.dia.crop.idn.date))^0.5 # R9 = Standard error of leaf counts
+      pred.data.1$Date[nrow(pred.data.1)] = height.dia.crop.idn.date$Date[1]
+      pred.data.1$Room[nrow(pred.data.1)] = rooms[i]
+      pred.data.1$W_treatment[nrow(pred.data.1)] = as.character(drought[j])
+    }
+  }
 }
-plots[[1]] = plot.fun1(height.dia[,c("Date","D","Leafarea")], harvest.data[,c("Date","D","Leafarea")], font.size)
-plots[[3]] = plot.fun1(height.dia[,c("Date","D","Leafmass")], harvest.data[,c("Date","D","Leafmass")], font.size)
-plots[[5]] = plot.fun1(height.dia[,c("Date","D","Stemmass")], harvest.data[,c("Date","D","Stemmass")], font.size)
-plots[[7]] = plot.fun1(height.dia[,c("Date","D","Rootmass")], harvest.data[,c("Date","D","Rootmass")], font.size)
+pred.data.1$Date = as.Date(pred.data.1$Date)
+pred.data.1 = subset(pred.data.1, Date %in% as.Date("2016-02-29"))
+pred.data.1$temp = ifelse(pred.data.1$Room == 1, 18, ifelse(pred.data.1$Room == 2, 21.5, ifelse(pred.data.1$Room == 3, 25,
+                                                                                                ifelse(pred.data.1$Room == 4, 28.5,ifelse(pred.data.1$Room == 5, 32, 35.5)))))
+drops <- c("Date","Room")
+pred.data.1 = pred.data.1[ , !(names(pred.data.1) %in% drops)]
+melted.pred.data.1 = melt(pred.data.1, id.vars=c("W_treatment","temp"))
 
-plots[[2]] = plot.fun1(height.dia[,c("Date","Height","Leafarea")], harvest.data[,c("Date","Height","Leafarea")], font.size)
-plots[[4]] = plot.fun1(height.dia[,c("Date","Height","Leafmass")], harvest.data[,c("Date","Height","Leafmass")], font.size)
-plots[[6]] = plot.fun1(height.dia[,c("Date","Height","Stemmass")], harvest.data[,c("Date","Height","Stemmass")], font.size)
-plots[[8]] = plot.fun1(height.dia[,c("Date","Height","Rootmass")], harvest.data[,c("Date","Height","Rootmass")], font.size)
+plots = list()
+font.size = 8
+meas = as.factor(c("Height","D","Leafarea", "Leafmass", "Stemmass", "Rootmass"))
+error = as.factor(c("Height_SE","D_SE","Leafarea_SE", "Leafmass_SE", "Stemmass_SE", "Rootmass_SE"))
+pd <- position_dodge(1) # move the overlapped errorbars horizontally
+for (p in 1:length(meas)) {
+  summary.data.Cpool = subset(melted.pred.data.1,variable %in% meas[p])
+  summary.error.Cpool = subset(melted.pred.data.1,variable %in% error[p])
+  summary.error.Cpool$parameter = summary.data.Cpool$value
+  
+  plots[[p]] = ggplot(summary.error.Cpool, aes(x=temp, y=parameter, group = W_treatment, colour=as.factor(W_treatment))) + 
+    geom_point(position=pd,size=2.5) +
+    geom_errorbar(position=pd,aes(ymin=parameter-value, ymax=parameter+value), colour="grey", width=2) +
+    geom_line(position=pd,data = summary.error.Cpool, aes(x = temp, y = parameter, group = W_treatment, colour=as.factor(W_treatment))) +
+    ylab(paste(as.character(meas[p]),"(g DM)")) + 
+    xlab(expression("Temperature"*~degree*C)) +
+    labs(colour="Drought treatment") +
+    theme_bw() + theme(text = element_text(size=font.size)) +
+    theme(axis.title.x = element_text(size = font.size, vjust=0.3)) +
+    theme(axis.title.y = element_text(size = font.size, vjust=0.3)) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
+  
+  if (p==1) {
+    plots[[p]] = plots[[p]] + ylab(paste(as.character(meas[p]),"(cm)")) +
+      theme(legend.title = element_text(colour="black", size=font.size)) +
+      theme(legend.text = element_text(colour="black", size = font.size)) +
+      theme(legend.key = element_blank()) +
+      theme(legend.key.height=unit(0.7,"line")) +
+      theme(legend.position = c(0.2,0.8), legend.direction = "vertical", legend.box = "vertical")
+  } else if (p==2) {
+    plots[[p]] = plots[[p]] + ylab(paste(as.character(meas[p]),"(mm)"))
+  } else if (p==3) {
+    plots[[p]] = plots[[p]] + ylab(expression(Leafarea~"("*cm^"2"*")"))
+  }
+  if (p>1) {
+    plots[[p]] = plots[[p]] + guides(colour=FALSE)
+  }
+}
+pdf(file = "Output/2.final_tree_attributes_drought.pdf")
+# print (do.call(grid.arrange,  plots, top = "Main Title"))
+grid.arrange(grobs=plots, ncol=2, top = "Tree attributes on final day (29/02/2016)")
+dev.off() 
 
-pdf(file = "Output/5.tree_attributes_logscale_over_time.pdf")
-grid.arrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]])
-grid.arrange(plots[[5]],plots[[6]],plots[[7]],plots[[8]])
-dev.off()
 #-----------------------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------------------
-# Plot all data  (harvested and predicted) with room (temperature) variation
-plots = list() 
-plots[[1]] = plot.fun1(height.dia[,c("Room","D","Leafarea")], harvest.data[,c("Room","D","Leafarea")], font.size)
-plots[[3]] = plot.fun1(height.dia[,c("Room","D","Leafmass")], harvest.data[,c("Room","D","Leafmass")], font.size)
-plots[[5]] = plot.fun1(height.dia[,c("Room","D","Stemmass")], harvest.data[,c("Room","D","Stemmass")], font.size)
-plots[[7]] = plot.fun1(height.dia[,c("Room","D","Rootmass")], harvest.data[,c("Room","D","Rootmass")], font.size)
-
-plots[[2]] = plot.fun1(height.dia[,c("Room","Height","Leafarea")], harvest.data[,c("Room","Height","Leafarea")], font.size)
-plots[[4]] = plot.fun1(height.dia[,c("Room","Height","Leafmass")], harvest.data[,c("Room","Height","Leafmass")], font.size)
-plots[[6]] = plot.fun1(height.dia[,c("Room","Height","Stemmass")], harvest.data[,c("Room","Height","Stemmass")], font.size)
-plots[[8]] = plot.fun1(height.dia[,c("Room","Height","Rootmass")], harvest.data[,c("Room","Height","Rootmass")], font.size)
-
-pdf(file = "Output/6.tree_attributes_logscale_with_temperature.pdf")
-grid.arrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]])
-grid.arrange(plots[[5]],plots[[6]],plots[[7]],plots[[8]])
-dev.off()
-#-----------------------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------------------
+# #- Plot all vs harvested (height and dia) data to explore the sampling effect on biomass prediction variation
+# height.dia$datatype = as.character("all")
+# harvest.data$datatype = as.character("harvested")
+# # harvest.data = unique(merge(harvest.data, height.dia[,c("Room","Pot")]))
+# harvest.data$Leafno = NULL
+# # height.dia$Room = NULL
+# avg.harvest.data.sampling = rbind(height.dia,harvest.data)
+# keeps <- c("Date", "Room", "datatype", "Height", "D", "Leafarea", "Leafmass", "Stemmass", "Rootmass")
+# avg.harvest.data.sampling = avg.harvest.data.sampling[ , keeps, drop = FALSE]
+# unique(avg.harvest.data.sampling$Date)
+# avg.harvest.data.sampling.1 = subset(avg.harvest.data.sampling, Date %in% 
+#                                        as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10")))
+# avg.harvest.data.sampling.2 = subset(avg.harvest.data.sampling, !(Date %in%
+#                                                                     as.Date(c("2016-01-28","2016-01-29","2016-02-08","2016-02-10"))))
+# plots = list() 
+# plots[[1]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=D)) + geom_boxplot(aes(fill=datatype)) +
+#   geom_jitter(size=0.25) +
+#   facet_wrap( ~ Date, scales="free_x") +
+#   scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
+#   xlab("Treatment room") + ylab("Diameter") + ggtitle("Diameter over time") +
+#   guides(fill=guide_legend(title="Data type")) +
+#   theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
+# 
+# plots[[2]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=D, group=Room, colour=as.factor(Room))) + geom_boxplot(aes(fill=datatype)) +
+#   geom_jitter(size=0.25) + 
+#   labs(colour="Treatments") +
+#   facet_wrap( ~ Date, scales="free_x") +
+#   scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
+#   xlab("Treatment room") + ylab("Diameter") + ggtitle("Diameter over time with treatments") +
+#   guides(fill=guide_legend(title="Data type")) +
+#   theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
+# 
+# plots[[3]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=Height)) + geom_boxplot(aes(fill=datatype)) +
+#   geom_jitter(size=0.25) +
+#   facet_wrap( ~ Date, scales="free_x") +
+#   scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
+#   xlab("Treatment room") + ylab("Height") + ggtitle("Height over time") +
+#   guides(fill=guide_legend(title="Data type")) +
+#   theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
+# 
+# plots[[4]] = ggplot(data = avg.harvest.data.sampling.1, aes(x=Room, y=Height, group=Room, colour=as.factor(Room))) + geom_boxplot(aes(fill=datatype)) +
+#   geom_jitter(size=0.25) + labs(colour="Treatments") +
+#   facet_wrap( ~ Date, scales="free_x") +
+#   scale_fill_manual(name = "Data type", values = c("white", "gray85")) +
+#   xlab("Treatment room") + ylab("Height") + ggtitle("Height over time with treatments") +
+#   guides(fill=guide_legend(title="Data type")) +
+#   theme_bw() + theme(legend.position = c(0.75,0.9),legend.direction = "horizontal",legend.box = "vertical")
+# # plots[[3]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=D)) + geom_boxplot(aes(fill=datatype)) +
+# #   geom_jitter(size=0.5) +
+# #   facet_wrap( ~ Date, scales="free_x") +
+# #   xlab("Date") + ylab("Diameter") + ggtitle("Diameter over time") +
+# #   guides(fill=guide_legend(title="Data type")) +
+# #   theme_bw() + theme(legend.position = c(0.9,0.1))
+# # plots[[4]] = ggplot(data = avg.harvest.data.sampling.2, aes(x=Date, y=Height)) + geom_boxplot(aes(fill=datatype)) +
+# #   geom_jitter(size=0.5) +
+# #   facet_wrap( ~ Date, scales="free_x") +
+# #   xlab("Date") + ylab("Height") + ggtitle("Height over time") +
+# #   guides(fill=guide_legend(title="Data type")) +
+# #   theme_bw() + theme(legend.position = c(0.9,0.1))
+# 
+# pdf(file = "Output/4.data_sampling.pdf")
+# plots
+# dev.off() 
+# 
+# #-----------------------------------------------------------------------------------------
+# # Plot all H vs D data (harvested and measured) over time 
+# plots = list() 
+# plots[[1]] = ggplot(data = avg.harvest.data.sampling, aes(x=D, y=Height, group=Room, colour=as.factor(Room))) + 
+#   geom_point(size=0.5) + stat_smooth(method=lm) +
+#   labs(colour="Rooms") + xlab("Diameter (mm)") + ylab("Height (cm)") + 
+#   ggtitle("Height vs Diameter with treatments") +
+#   theme_bw() + theme(legend.position = c(0.85,0.25))
+# 
+# plots[[2]] = ggplot(data = avg.harvest.data.sampling, aes(x=D, y=Height, group=Room, colour=as.factor(Room))) + 
+#   stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE) +
+#   geom_smooth(method="lm",se=FALSE) + geom_point(size=0.5) + 
+#   facet_wrap(~Room, scales="free_x") +
+#   labs(colour="Rooms") + xlab("Diameter (mm)") + ylab("Height (cm)") + 
+#   theme_bw() + theme(legend.key.width=unit(0.9,"line")) +
+#   theme(legend.position = c(0.17,0.9),legend.direction = "horizontal",legend.box = "vertical")
+# 
+# pdf(file = "Output/7.height_vs_dia_treatments.pdf")
+# plots
+# dev.off() 
+# #-----------------------------------------------------------------------------------------
+# 
+# 
+# 
+# #-----------------------------------------------------------------------------------------
+# # Plot all data (harvested and predicted) in log scale over time 
+# plots = list() 
+# font.size = 10
+# # ggplot(data=avg.harvest.data.sampling, aes(x=D, y=Stemmass, group = interaction(Room,datatype), colour=as.factor(Room), shape=as.factor(datatype), size=as.factor(datatype))) +
+# #   geom_point() +
+# #   coord_trans(y = "log10") +
+# #   scale_size_manual(values=c(1,2))
+# plot.fun1 <- function(df1,df2,font.size){
+#   plots = ggplot() +
+#     geom_point(data=df1, aes(x=df1[,2], y=df1[,3], group = colnames(df1)[1], colour=as.factor(df1[,1])),size=0.1) +
+#     coord_trans(y = "log10") + ylab(paste(as.character(colnames(df1)[3] ), "(log scale)")) + 
+#     xlab(paste(as.character(colnames(df1)[2]))) +
+#     geom_point(data=df2, aes(x = df2[,2], y = df2[,3], group = colnames(df2)[3], colour=as.factor(df2[,1])),pch=2,size=1) +
+#     scale_color_manual(name=paste(as.character(colnames(df1)[1])), values = rainbow(14)) +
+#     theme_bw() + scale_size_manual(name="Data type", values=c(1,2)) +
+#     annotate("text", x = (min(df1[,2])*4), y = (max(df1[,3])*0.9), size = font.size-8, 
+#              label = paste("Dots = Predicted", "\nTriangles = Harvest")) +
+#     theme(legend.title = element_text(colour="black", size=font.size-3)) +
+#     theme(legend.text = element_text(colour="black", size = font.size-5)) +
+#     theme(legend.position = c(0.8,0.3)) + theme(legend.key = element_blank()) +
+#     theme(text = element_text(size=font.size)) +
+#     theme(axis.title.x = element_text(size = font.size)) + theme(axis.title.y = element_text(size = font.size)) +
+#     theme(legend.key.height=unit(0.5,"line")) +
+#     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+#   output = plots
+# }
+# plots[[1]] = plot.fun1(height.dia[,c("Date","D","Leafarea")], harvest.data[,c("Date","D","Leafarea")], font.size)
+# plots[[3]] = plot.fun1(height.dia[,c("Date","D","Leafmass")], harvest.data[,c("Date","D","Leafmass")], font.size)
+# plots[[5]] = plot.fun1(height.dia[,c("Date","D","Stemmass")], harvest.data[,c("Date","D","Stemmass")], font.size)
+# plots[[7]] = plot.fun1(height.dia[,c("Date","D","Rootmass")], harvest.data[,c("Date","D","Rootmass")], font.size)
+# 
+# plots[[2]] = plot.fun1(height.dia[,c("Date","Height","Leafarea")], harvest.data[,c("Date","Height","Leafarea")], font.size)
+# plots[[4]] = plot.fun1(height.dia[,c("Date","Height","Leafmass")], harvest.data[,c("Date","Height","Leafmass")], font.size)
+# plots[[6]] = plot.fun1(height.dia[,c("Date","Height","Stemmass")], harvest.data[,c("Date","Height","Stemmass")], font.size)
+# plots[[8]] = plot.fun1(height.dia[,c("Date","Height","Rootmass")], harvest.data[,c("Date","Height","Rootmass")], font.size)
+# 
+# pdf(file = "Output/5.tree_attributes_logscale_over_time.pdf")
+# grid.arrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]])
+# grid.arrange(plots[[5]],plots[[6]],plots[[7]],plots[[8]])
+# dev.off()
+# #-----------------------------------------------------------------------------------------
+# 
+# 
+# #-----------------------------------------------------------------------------------------
+# # Plot all data  (harvested and predicted) with room (temperature) variation
+# plots = list() 
+# plots[[1]] = plot.fun1(height.dia[,c("Room","D","Leafarea")], harvest.data[,c("Room","D","Leafarea")], font.size)
+# plots[[3]] = plot.fun1(height.dia[,c("Room","D","Leafmass")], harvest.data[,c("Room","D","Leafmass")], font.size)
+# plots[[5]] = plot.fun1(height.dia[,c("Room","D","Stemmass")], harvest.data[,c("Room","D","Stemmass")], font.size)
+# plots[[7]] = plot.fun1(height.dia[,c("Room","D","Rootmass")], harvest.data[,c("Room","D","Rootmass")], font.size)
+# 
+# plots[[2]] = plot.fun1(height.dia[,c("Room","Height","Leafarea")], harvest.data[,c("Room","Height","Leafarea")], font.size)
+# plots[[4]] = plot.fun1(height.dia[,c("Room","Height","Leafmass")], harvest.data[,c("Room","Height","Leafmass")], font.size)
+# plots[[6]] = plot.fun1(height.dia[,c("Room","Height","Stemmass")], harvest.data[,c("Room","Height","Stemmass")], font.size)
+# plots[[8]] = plot.fun1(height.dia[,c("Room","Height","Rootmass")], harvest.data[,c("Room","Height","Rootmass")], font.size)
+# 
+# pdf(file = "Output/6.tree_attributes_logscale_with_temperature.pdf")
+# grid.arrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]])
+# grid.arrange(plots[[5]],plots[[6]],plots[[7]],plots[[8]])
+# dev.off()
+# #-----------------------------------------------------------------------------------------
+# 
+# #-----------------------------------------------------------------------------------------
 
 
